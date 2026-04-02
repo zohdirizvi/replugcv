@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReplugCV — Final Brand Direction</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cabinet+Grotesk:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #09090B; color: #e5e5e5; }
+
+  .header { text-align: center; padding: 60px 20px 20px; }
+  .header h1 { font-family: 'Cabinet Grotesk', sans-serif; font-size: 2.5rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+  .header p { font-size: 1rem; color: #71717A; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+  .section-label { text-align: center; padding: 50px 20px 8px; font-family: 'Cabinet Grotesk', sans-serif; font-size: 1.1rem; font-weight: 800; color: #A78BFA; letter-spacing: 0.08em; text-transform: uppercase; }
+  .section-sub { text-align: center; font-size: 0.8rem; color: #52525B; margin-bottom: 28px; }
+
+  .modes { display: flex; gap: 32px; padding: 0 40px 40px; flex-wrap: wrap; justify-content: center; }
+  .mode-card { flex: 1; min-width: 440px; max-width: 560px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
+
+  .card-header { padding: 24px; }
+  .card-header h2 { font-family: 'Cabinet Grotesk', sans-serif; font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+  .card-header p { font-size: 0.75rem; }
+
+  .swatches { display: flex; }
+  .swatch { flex: 1; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 0.48rem; font-weight: 600; letter-spacing: 0.04em; text-align: center; line-height: 1.3; }
+
+  .card-body { padding: 24px; }
+
+  .mock-ui { border-radius: 12px; overflow: hidden; }
+  .mock-nav { display: flex; align-items: center; gap: 10px; padding: 12px 16px; }
+  .mock-logo { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; color: #fff; }
+  .mock-nav-title { font-size: 0.8rem; font-weight: 700; }
+  .mock-nav-links { margin-left: auto; display: flex; gap: 16px; font-size: 0.65rem; font-weight: 500; }
+  .mock-content { padding: 20px; }
+  .mock-heading { font-family: 'Cabinet Grotesk', sans-serif; font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; }
+  .mock-text { font-size: 0.72rem; line-height: 1.6; margin-bottom: 14px; }
+  .mock-btn { display: inline-block; padding: 9px 20px; border-radius: 8px; font-size: 0.68rem; font-weight: 600; color: #fff; border: none; cursor: pointer; transition: opacity 0.15s; }
+  .mock-btn:hover { opacity: 0.9; }
+  .mock-btn-outline { display: inline-block; padding: 8px 19px; border-radius: 8px; font-size: 0.68rem; font-weight: 600; border: 1px solid; background: none; cursor: pointer; margin-left: 8px; }
+  .mock-btn-ghost { display: inline-block; padding: 8px 12px; font-size: 0.68rem; font-weight: 600; background: none; border: none; cursor: pointer; }
+  .mock-badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 0.55rem; font-weight: 600; margin-right: 6px; margin-bottom: 4px; }
+  .mock-score { font-family: 'Cabinet Grotesk', sans-serif; font-size: 2.4rem; font-weight: 800; line-height: 1; }
+  .mock-score-label { font-size: 0.6rem; font-weight: 500; margin-top: 4px; }
+  .mock-cards { display: flex; gap: 8px; margin-top: 14px; }
+  .mock-stat { flex: 1; padding: 12px; border-radius: 10px; text-align: center; }
+  .mock-stat-n { font-family: 'Cabinet Grotesk', sans-serif; font-size: 1.3rem; font-weight: 800; }
+  .mock-stat-l { font-size: 0.55rem; font-weight: 500; margin-top: 2px; }
+  .mock-input { width: 100%; padding: 9px 12px; border-radius: 8px; font-size: 0.7rem; font-family: 'Inter', sans-serif; outline: none; }
+  .mock-input-label { font-size: 0.65rem; font-weight: 600; margin-bottom: 5px; display: block; }
+  .mock-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+  .mock-toggle-label { font-size: 0.72rem; font-weight: 500; }
+  .mock-toggle-sub { font-size: 0.6rem; margin-top: 2px; }
+  .mock-toggle { width: 36px; height: 20px; border-radius: 10px; position: relative; cursor: pointer; }
+  .mock-toggle-thumb { position: absolute; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+
+  .tagline { margin-top: 16px; padding: 14px; border-radius: 10px; font-size: 0.75rem; font-style: italic; text-align: center; font-weight: 500; }
+
+  .brand-rules { max-width: 700px; margin: 0 auto; padding: 20px 40px 60px; }
+  .brand-rules h3 { font-family: 'Cabinet Grotesk', sans-serif; font-size: 1rem; font-weight: 800; color: #fff; margin: 24px 0 8px; }
+  .brand-rules p { font-size: 0.78rem; color: #71717A; line-height: 1.7; }
+  .brand-rules .rule-row { display: flex; gap: 16px; margin: 8px 0; flex-wrap: wrap; }
+  .brand-rules .rule-do, .brand-rules .rule-dont { flex: 1; min-width: 200px; padding: 12px 16px; border-radius: 8px; font-size: 0.7rem; line-height: 1.6; }
+  .brand-rules .rule-do { background: rgba(139,92,246,0.08); color: #A78BFA; border: 1px solid rgba(139,92,246,0.15); }
+  .brand-rules .rule-dont { background: rgba(239,68,68,0.06); color: #F87171; border: 1px solid rgba(239,68,68,0.1); }
+  .brand-rules .rule-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+
+  .gradient-demo { display: flex; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+  .gradient-swatch { width: 80px; height: 80px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: #fff; }
+  .gradient-label { font-size: 0.55rem; color: #71717A; text-align: center; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ReplugCV — Final Direction</h1>
+  <p>Neon Insurgent personality + Electric Precision CTAs. Bold but clickable.</p>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- DARK + LIGHT SIDE BY SIDE -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-label">The Hybrid Palette</div>
+<div class="section-sub">Gradient for brand marks & decoration. Solid violet for all interactive elements.</div>
+
+<div class="swatches" style="max-width:700px;margin:0 auto 32px;border-radius:12px;overflow:hidden">
+  <div class="swatch" style="background:#8B5CF6;color:#fff">Primary<br>#8B5CF6</div>
+  <div class="swatch" style="background:#7C3AED;color:#fff">Pressed<br>#7C3AED</div>
+  <div class="swatch" style="background:#EC4899;color:#fff">Accent<br>#EC4899</div>
+  <div class="swatch" style="background:#A3E635;color:#000">Success<br>#A3E635</div>
+  <div class="swatch" style="background:#F59E0B;color:#000">Warning<br>#F59E0B</div>
+  <div class="swatch" style="background:#EF4444;color:#fff">Error<br>#EF4444</div>
+  <div class="swatch" style="background:#09090B;color:#fff">Surface<br>#09090B</div>
+  <div class="swatch" style="background:#FAFAFA;color:#000">Light<br>#FAFAFA</div>
+</div>
+
+<div class="modes">
+
+  <!-- ═══ DARK MODE ═══ -->
+  <div class="mode-card" style="background:#09090B">
+    <div class="card-header" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">
+      <h2 style="color:#fff">Dark Mode</h2>
+      <p style="color:rgba(255,255,255,0.7)">Product UI — editor, dashboard, settings</p>
+    </div>
+    <div class="card-body">
+      <!-- Dashboard mock -->
+      <div class="mock-ui" style="background:#09090B;border:1px solid rgba(255,255,255,0.06)">
+        <div class="mock-nav" style="background:#18181B;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div class="mock-logo" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">R</div>
+          <span class="mock-nav-title" style="color:#FAFAFA">ReplugCV</span>
+          <div class="mock-nav-links">
+            <span style="color:#A78BFA">Resumes</span>
+            <span style="color:#71717A">Templates</span>
+            <span style="color:#71717A">Settings</span>
+          </div>
+        </div>
+        <div class="mock-content">
+          <div class="mock-heading" style="color:#FAFAFA">Your ATS Score</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+            <div class="mock-score" style="color:#A3E635">92</div>
+            <div class="mock-score-label" style="color:#71717A">out of 100</div>
+          </div>
+          <div class="mock-text" style="color:#A1A1AA">Your resume is well-optimized for Senior UX Designer roles. Three quick improvements could push it above 95.</div>
+          <div>
+            <span class="mock-badge" style="background:rgba(139,92,246,0.12);color:#A78BFA">ATS Safe</span>
+            <span class="mock-badge" style="background:rgba(163,230,53,0.1);color:#A3E635">12 Keywords</span>
+            <span class="mock-badge" style="background:rgba(245,158,11,0.1);color:#F59E0B">2 Fixes</span>
+          </div>
+          <div class="mock-cards">
+            <div class="mock-stat" style="background:#18181B;border:1px solid rgba(255,255,255,0.04)"><div class="mock-stat-n" style="color:#8B5CF6">3</div><div class="mock-stat-l" style="color:#71717A">Variants</div></div>
+            <div class="mock-stat" style="background:#18181B;border:1px solid rgba(255,255,255,0.04)"><div class="mock-stat-n" style="color:#A3E635">92</div><div class="mock-stat-l" style="color:#71717A">ATS Score</div></div>
+            <div class="mock-stat" style="background:#18181B;border:1px solid rgba(255,255,255,0.04)"><div class="mock-stat-n" style="color:#EC4899">1</div><div class="mock-stat-l" style="color:#71717A">Base</div></div>
+          </div>
+          <div style="margin-top:16px">
+            <button class="mock-btn" style="background:#8B5CF6">Fix Issues →</button>
+            <button class="mock-btn-outline" style="border-color:#27272A;color:#A1A1AA">View Report</button>
+            <button class="mock-btn-ghost" style="color:#A78BFA">Download PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form elements demo -->
+      <div style="margin-top:16px;padding:16px;background:#18181B;border-radius:10px;border:1px solid rgba(255,255,255,0.04)">
+        <div style="margin-bottom:12px">
+          <span class="mock-input-label" style="color:#A1A1AA">Resume Title</span>
+          <div class="mock-input" style="background:#09090B;border:1px solid #27272A;color:#FAFAFA">Senior UX Designer — Stripe Application</div>
+        </div>
+        <div class="mock-toggle-row" style="border-bottom:1px solid rgba(255,255,255,0.04);padding-bottom:12px">
+          <div>
+            <div class="mock-toggle-label" style="color:#E4E4E7">Mark as base resume</div>
+            <div class="mock-toggle-sub" style="color:#52525B">All variants will inherit from this</div>
+          </div>
+          <div class="mock-toggle" style="background:#8B5CF6"><div class="mock-toggle-thumb" style="left:19px"></div></div>
+        </div>
+        <div class="mock-toggle-row">
+          <div>
+            <div class="mock-toggle-label" style="color:#E4E4E7">ATS optimization</div>
+            <div class="mock-toggle-sub" style="color:#52525B">Score against job description keywords</div>
+          </div>
+          <div class="mock-toggle" style="background:#27272A"><div class="mock-toggle-thumb" style="left:3px"></div></div>
+        </div>
+      </div>
+
+      <div class="tagline" style="background:#18181B;border:1px solid rgba(139,92,246,0.1);color:#A78BFA">"One base. Infinite variants."</div>
+    </div>
+  </div>
+
+  <!-- ═══ LIGHT MODE ═══ -->
+  <div class="mode-card" style="background:#FAFAFA;border-color:rgba(0,0,0,0.08)">
+    <div class="card-header" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">
+      <h2 style="color:#fff">Light Mode</h2>
+      <p style="color:rgba(255,255,255,0.7)">Marketing, onboarding, settings, print</p>
+    </div>
+    <div class="card-body" style="background:#FAFAFA">
+      <!-- Dashboard mock -->
+      <div class="mock-ui" style="background:#fff;border:1px solid rgba(0,0,0,0.06)">
+        <div class="mock-nav" style="background:#FAFAFA;border-bottom:1px solid rgba(0,0,0,0.05)">
+          <div class="mock-logo" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">R</div>
+          <span class="mock-nav-title" style="color:#18181B">ReplugCV</span>
+          <div class="mock-nav-links">
+            <span style="color:#7C3AED">Resumes</span>
+            <span style="color:#A1A1AA">Templates</span>
+            <span style="color:#A1A1AA">Settings</span>
+          </div>
+        </div>
+        <div class="mock-content">
+          <div class="mock-heading" style="color:#18181B">Your ATS Score</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+            <div class="mock-score" style="color:#16A34A">92</div>
+            <div class="mock-score-label" style="color:#71717A">out of 100</div>
+          </div>
+          <div class="mock-text" style="color:#52525B">Your resume is well-optimized for Senior UX Designer roles. Three quick improvements could push it above 95.</div>
+          <div>
+            <span class="mock-badge" style="background:rgba(124,58,237,0.06);color:#7C3AED">ATS Safe</span>
+            <span class="mock-badge" style="background:rgba(22,163,74,0.06);color:#16A34A">12 Keywords</span>
+            <span class="mock-badge" style="background:rgba(217,119,6,0.06);color:#D97706">2 Fixes</span>
+          </div>
+          <div class="mock-cards">
+            <div class="mock-stat" style="background:#F4F4F5;border:1px solid rgba(0,0,0,0.04)"><div class="mock-stat-n" style="color:#7C3AED">3</div><div class="mock-stat-l" style="color:#71717A">Variants</div></div>
+            <div class="mock-stat" style="background:#F4F4F5;border:1px solid rgba(0,0,0,0.04)"><div class="mock-stat-n" style="color:#16A34A">92</div><div class="mock-stat-l" style="color:#71717A">ATS Score</div></div>
+            <div class="mock-stat" style="background:#F4F4F5;border:1px solid rgba(0,0,0,0.04)"><div class="mock-stat-n" style="color:#DB2777">1</div><div class="mock-stat-l" style="color:#71717A">Base</div></div>
+          </div>
+          <div style="margin-top:16px">
+            <button class="mock-btn" style="background:#8B5CF6">Fix Issues →</button>
+            <button class="mock-btn-outline" style="border-color:#E4E4E7;color:#52525B">View Report</button>
+            <button class="mock-btn-ghost" style="color:#7C3AED">Download PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form elements demo -->
+      <div style="margin-top:16px;padding:16px;background:#fff;border-radius:10px;border:1px solid rgba(0,0,0,0.06)">
+        <div style="margin-bottom:12px">
+          <span class="mock-input-label" style="color:#52525B">Resume Title</span>
+          <div class="mock-input" style="background:#FAFAFA;border:1px solid #E4E4E7;color:#18181B">Senior UX Designer — Stripe Application</div>
+        </div>
+        <div class="mock-toggle-row" style="border-bottom:1px solid rgba(0,0,0,0.04);padding-bottom:12px">
+          <div>
+            <div class="mock-toggle-label" style="color:#27272A">Mark as base resume</div>
+            <div class="mock-toggle-sub" style="color:#A1A1AA">All variants will inherit from this</div>
+          </div>
+          <div class="mock-toggle" style="background:#8B5CF6"><div class="mock-toggle-thumb" style="left:19px"></div></div>
+        </div>
+        <div class="mock-toggle-row">
+          <div>
+            <div class="mock-toggle-label" style="color:#27272A">ATS optimization</div>
+            <div class="mock-toggle-sub" style="color:#A1A1AA">Score against job description keywords</div>
+          </div>
+          <div class="mock-toggle" style="background:#E4E4E7"><div class="mock-toggle-thumb" style="left:3px"></div></div>
+        </div>
+      </div>
+
+      <div class="tagline" style="background:#F5F3FF;border:1px solid rgba(124,58,237,0.1);color:#7C3AED">"One base. Infinite variants."</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- BRAND RULES -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-label">Brand Rules</div>
+<div class="section-sub">Where gradients live vs where solid colors live</div>
+
+<div class="brand-rules">
+
+  <h3>Logo & Brand Mark</h3>
+  <p>The violet→pink gradient is ONLY used for the logo mark, hero backgrounds, and decorative accents. Never for buttons or interactive elements.</p>
+  <div class="gradient-demo">
+    <div>
+      <div class="gradient-swatch" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">R</div>
+      <div class="gradient-label">Logo mark</div>
+    </div>
+    <div>
+      <div class="gradient-swatch" style="background:linear-gradient(135deg,#8B5CF6,#EC4899);border-radius:50%">R</div>
+      <div class="gradient-label">Avatar</div>
+    </div>
+    <div>
+      <div class="gradient-swatch" style="background:linear-gradient(135deg,#8B5CF6 0%,#EC4899 50%,#F59E0B 100%);width:160px">HERO BG</div>
+      <div class="gradient-label">Hero gradient</div>
+    </div>
+  </div>
+
+  <h3>Buttons & CTAs</h3>
+  <div class="rule-row">
+    <div class="rule-do">
+      <div class="rule-label">✓ Do this</div>
+      <button class="mock-btn" style="background:#8B5CF6;margin:4px 0">Solid Violet CTA</button><br>
+      <button class="mock-btn" style="background:#7C3AED;margin:4px 0">Solid Violet Hover</button><br>
+      <button class="mock-btn" style="background:#EF4444;margin:4px 0">Solid Red Destructive</button>
+    </div>
+    <div class="rule-dont">
+      <div class="rule-label">✗ Don't do this</div>
+      <button class="mock-btn" style="background:linear-gradient(135deg,#8B5CF6,#EC4899);margin:4px 0">Gradient Button</button><br>
+      <button class="mock-btn" style="background:#EC4899;margin:4px 0">Pink Button</button><br>
+      <button class="mock-btn" style="background:#A3E635;color:#000;margin:4px 0">Green Button</button>
+    </div>
+  </div>
+
+  <h3>Status Colors</h3>
+  <div class="rule-row">
+    <div class="rule-do" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="mock-badge" style="background:rgba(163,230,53,0.1);color:#A3E635">Score 90+</span>
+      <span class="mock-badge" style="background:rgba(245,158,11,0.1);color:#F59E0B">Score 60-89</span>
+      <span class="mock-badge" style="background:rgba(239,68,68,0.1);color:#EF4444">Score &lt;60</span>
+      <span class="mock-badge" style="background:rgba(139,92,246,0.1);color:#A78BFA">Info</span>
+    </div>
+  </div>
+
+  <h3>Typography</h3>
+  <p style="margin-bottom:8px"><strong style="color:#E4E4E7">Product UI:</strong> Inter (body) · Geist Mono (data/scores)</p>
+  <p style="margin-bottom:8px"><strong style="color:#E4E4E7">Marketing:</strong> Cabinet Grotesk (headlines) · Inter (body)</p>
+  <div style="margin:12px 0;padding:16px;background:#18181B;border-radius:10px;border:1px solid rgba(255,255,255,0.04)">
+    <div style="font-family:'Cabinet Grotesk',sans-serif;font-size:1.6rem;font-weight:800;color:#FAFAFA;margin-bottom:4px">Cabinet Grotesk for Impact</div>
+    <div style="font-size:0.85rem;color:#A1A1AA;margin-bottom:8px">Inter for comfortable reading at body sizes. Clean, neutral, professional.</div>
+    <div style="font-family:monospace;font-size:0.75rem;color:#A3E635;background:#09090B;padding:8px 12px;border-radius:6px">ATS_SCORE: 92 | KEYWORDS_MATCHED: 12/15 | STATUS: optimized</div>
+  </div>
+
+  <h3>Tagline</h3>
+  <p>Primary: <strong style="color:#A78BFA">"One base. Infinite variants."</strong></p>
+  <p>Campaign: <strong style="color:#A78BFA">"Stop sending resumes. Start deploying them."</strong></p>
+</div>
+
+</body>
+</html>

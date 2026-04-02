@@ -51,7 +51,8 @@ export default function LoginPage() {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8 text-center">
-        <h1 className="text-display-xs font-bold text-primary">ReplugCV</h1>
+        <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#EC4899] text-xl font-extrabold text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>R</div>
+        <h1 className="text-display-xs font-bold text-primary" style={{ fontFamily: "'Manrope', sans-serif" }}>ReplugCV</h1>
         <p className="mt-2 text-sm text-tertiary">Sign in to your account</p>
       </div>
 

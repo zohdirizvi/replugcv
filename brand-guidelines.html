@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReplugCV — Brand Guidelines & Personas</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #09090B; color: #D4D4D8; line-height: 1.7; }
+
+  /* Layout */
+  .page { max-width: 960px; margin: 0 auto; padding: 60px 40px; }
+  .cover { text-align: center; padding: 100px 20px 80px; border-bottom: 1px solid rgba(255,255,255,0.04); margin-bottom: 60px; }
+  .cover-logo { display: inline-flex; width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #8B5CF6, #EC4899); align-items: center; justify-content: center; font-family: 'Manrope', sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 20px; }
+  .cover h1 { font-family: 'Manrope', sans-serif; font-size: 2.8rem; font-weight: 800; color: #FAFAFA; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .cover p { font-size: 1rem; color: #71717A; max-width: 480px; margin: 0 auto; }
+  .cover-tag { display: inline-block; margin-top: 20px; padding: 6px 16px; border-radius: 99px; background: rgba(139,92,246,0.1); color: #A78BFA; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; }
+
+  /* Sections */
+  .section { margin-bottom: 64px; }
+  .section-num { font-family: 'Manrope', sans-serif; font-size: 0.6rem; font-weight: 800; color: #8B5CF6; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+  .section h2 { font-family: 'Manrope', sans-serif; font-size: 1.6rem; font-weight: 800; color: #FAFAFA; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .section .subtitle { font-size: 0.85rem; color: #52525B; margin-bottom: 24px; }
+  .section p { font-size: 0.88rem; color: #A1A1AA; margin-bottom: 12px; }
+
+  /* Color palette */
+  .palette-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+  .color-card { border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.04); }
+  .color-swatch { height: 80px; display: flex; align-items: flex-end; padding: 10px 12px; }
+  .color-info { padding: 10px 12px; background: #18181B; }
+  .color-name { font-size: 0.75rem; font-weight: 600; color: #E4E4E7; }
+  .color-hex { font-size: 0.65rem; color: #52525B; font-family: monospace; }
+  .color-use { font-size: 0.6rem; color: #3F3F46; margin-top: 2px; }
+
+  /* Typography specimens */
+  .type-specimen { background: #18181B; border-radius: 12px; padding: 24px; margin: 16px 0; border: 1px solid rgba(255,255,255,0.04); }
+  .type-label { font-size: 0.55rem; font-weight: 700; color: #8B5CF6; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+  .type-sample { color: #FAFAFA; margin-bottom: 4px; }
+  .type-meta { font-size: 0.65rem; color: #3F3F46; font-family: monospace; }
+  .type-alphabet { font-size: 0.8rem; color: #52525B; margin-top: 8px; word-break: break-all; }
+
+  /* Logo */
+  .logo-grid { display: flex; gap: 24px; flex-wrap: wrap; margin: 20px 0; }
+  .logo-variant { flex: 1; min-width: 180px; padding: 32px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .logo-mark { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Manrope', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff; }
+  .logo-wordmark { font-family: 'Manrope', sans-serif; font-size: 1.1rem; font-weight: 800; }
+  .logo-label { font-size: 0.55rem; color: #52525B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* Voice */
+  .voice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .voice-card { padding: 16px; border-radius: 10px; }
+  .voice-do { background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.1); }
+  .voice-dont { background: rgba(239,68,68,0.04); border: 1px solid rgba(239,68,68,0.08); }
+  .voice-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .voice-label.do { color: #A78BFA; }
+  .voice-label.dont { color: #F87171; }
+  .voice-example { font-size: 0.8rem; line-height: 1.6; }
+  .voice-do .voice-example { color: #C4B5FD; }
+  .voice-dont .voice-example { color: #FCA5A5; }
+
+  /* Personas */
+  .persona-card { background: #18181B; border: 1px solid rgba(255,255,255,0.04); border-radius: 16px; padding: 28px; margin: 16px 0; }
+  .persona-header { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
+  .persona-avatar { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-family: 'Manrope', sans-serif; font-size: 1.3rem; font-weight: 800; color: #fff; flex-shrink: 0; }
+  .persona-name { font-family: 'Manrope', sans-serif; font-size: 1.1rem; font-weight: 800; color: #FAFAFA; }
+  .persona-title { font-size: 0.78rem; color: #71717A; }
+  .persona-tag { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 0.55rem; font-weight: 600; margin-right: 6px; margin-top: 4px; }
+  .persona-section { margin-top: 16px; }
+  .persona-section-title { font-size: 0.6rem; font-weight: 700; color: #8B5CF6; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .persona-list { list-style: none; }
+  .persona-list li { font-size: 0.8rem; color: #A1A1AA; padding: 3px 0; padding-left: 16px; position: relative; }
+  .persona-list li::before { content: "→"; position: absolute; left: 0; color: #52525B; }
+  .persona-quote { font-size: 0.85rem; font-style: italic; color: #8B5CF6; padding: 12px 16px; background: rgba(139,92,246,0.06); border-left: 3px solid #8B5CF6; border-radius: 0 8px 8px 0; margin-top: 12px; }
+  .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .persona-stat { background: #09090B; border-radius: 8px; padding: 10px 14px; }
+  .persona-stat-label { font-size: 0.55rem; color: #52525B; text-transform: uppercase; letter-spacing: 0.08em; }
+  .persona-stat-value { font-family: 'Manrope', sans-serif; font-size: 1rem; font-weight: 700; color: #E4E4E7; }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid rgba(255,255,255,0.04); margin: 48px 0; }
+
+  /* Tagline */
+  .tagline-block { text-align: center; padding: 40px; background: #18181B; border-radius: 16px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.04); }
+  .tagline-primary { font-family: 'Manrope', sans-serif; font-size: 1.8rem; font-weight: 800; color: #FAFAFA; margin-bottom: 8px; }
+  .tagline-secondary { font-size: 0.85rem; color: #71717A; }
+
+  /* Button samples */
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; align-items: center; }
+  .btn { padding: 9px 20px; border-radius: 8px; font-size: 0.72rem; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .btn-outline { padding: 8px 19px; border-radius: 8px; font-size: 0.72rem; font-weight: 600; background: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .btn-ghost { padding: 8px 12px; font-size: 0.72rem; font-weight: 600; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 0.55rem; font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .page { padding: 40px 20px; }
+    .cover h1 { font-size: 2rem; }
+    .palette-grid { grid-template-columns: repeat(2, 1fr); }
+    .voice-grid { grid-template-columns: 1fr; }
+    .persona-grid { grid-template-columns: 1fr; }
+    .logo-grid { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- COVER -->
+<!-- ═══════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">R</div>
+  <h1>ReplugCV</h1>
+  <p>Brand Guidelines & User Personas</p>
+  <div class="cover-tag">Version 1.0 — April 2026</div>
+</div>
+
+<div class="page">
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 01 BRAND OVERVIEW -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-num">01</div>
+  <h2>Brand Overview</h2>
+  <div class="subtitle">What ReplugCV is and what it stands for</div>
+  <p><strong style="color:#FAFAFA">ReplugCV</strong> is an AI-powered resume builder designed for designers, developers, and modern professionals who apply strategically — not spray-and-pray.</p>
+  <p>Our core innovation is the <strong style="color:#A78BFA">base/variant system</strong> — inspired by Git branching. Create one base resume, then generate tailored variants for every job application. Change once, propagate everywhere.</p>
+  <p>We exist because the resume industry is broken: bait-and-switch pricing, generic AI content, unverifiable ATS claims, and zero collaboration. ReplugCV is the antidote — transparent, precise, and built by people who understand the problem because they lived it.</p>
+
+  <div class="tagline-block">
+    <div class="tagline-primary">One base. Infinite variants.</div>
+    <div class="tagline-secondary">Primary tagline — used across all touchpoints</div>
+  </div>
+
+  <p style="margin-top:16px"><strong style="color:#E4E4E7">Campaign taglines:</strong></p>
+  <ul style="list-style:none;margin:8px 0 0">
+    <li style="padding:4px 0;color:#A78BFA">→ "Stop sending resumes. Start deploying them."</li>
+    <li style="padding:4px 0;color:#A78BFA">→ "Your resume is a system, not a document."</li>
+    <li style="padding:4px 0;color:#A78BFA">→ "Resumes that pass machines. Impress humans."</li>
+    <li style="padding:4px 0;color:#A78BFA">→ "Branch. Tailor. Land."</li>
+  </ul>
+</div>
+
+<hr>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 02 COLOR PALETTE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-num">02</div>
+  <h2>Color Palette</h2>
+  <div class="subtitle">Neon Insurgent personality with Electric Precision CTAs</div>
+
+  <div class="palette-grid">
+    <div class="color-card">
+      <div class="color-swatch" style="background:#8B5CF6"></div>
+      <div class="color-info">
+        <div class="color-name">Ultraviolet</div>
+        <div class="color-hex">#8B5CF6</div>
+        <div class="color-use">Primary — all CTAs, buttons, links, active states</div>
+      </div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:#7C3AED"></div>
+      <div class="color-info">
+        <div class="color-name">Violet Dark</div>
+        <div class="color-hex">#7C3AED</div>
+        <div class="color-use">Hover/pressed states for primary buttons</div>
+      </div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:#EC4899"></div>
+      <div class="color-info">
+        <div class="color-name">Hot Pink</div>
+        <div class="color-hex">#EC4899</div>
+        <div class="color-use">Accent — gradient endpoint, decorative only</div>
+      </div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)"></div>
+      <div class="color-info">
+        <div class="color-name">Brand Gradient</div>
+        <div class="color-hex">#8B5CF6 → #EC4899</div>
+        <div class="color-use">Logo mark, hero backgrounds, decorative ONLY</div>
+      </div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:#A3E635"></div>
+      <div class="color-info">
+        <div class="color-name">Acid Green</div>
+        <div class="color-hex">#A3E635</div>
+        <div class="color-use">Success — ATS scores 90+, positive states</div>
+      </div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:#F59E0B"></div>
+      <div class="color-info">
+        <div class="color-name">Amber</div>
+        <div class="color-hex">#F59E0B</div>
+        <div class="color-use">Warning — ATS scores 60-89, caution states</div>
+      </div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:#EF4444"></div>
+      <div class="color-info">
+        <div class="color-name">Red</div>
+        <div class="color-hex">#EF4444</div>
+        <div class="color-use">Error — ATS scores &lt;60, destructive actions</div>
+      </div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:#71717A"></div>
+      <div class="color-info">
+        <div class="color-name">Zinc</div>
+        <div class="color-hex">#71717A</div>
+        <div class="color-use">Secondary text, labels, metadata</div>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin-top:8px"><strong style="color:#E4E4E7">Surface colors:</strong></p>
+  <div class="palette-grid" style="grid-template-columns:repeat(5,1fr)">
+    <div class="color-card"><div class="color-swatch" style="background:#09090B;height:48px"></div><div class="color-info"><div class="color-name">Near Black</div><div class="color-hex">#09090B</div></div></div>
+    <div class="color-card"><div class="color-swatch" style="background:#18181B;height:48px"></div><div class="color-info"><div class="color-name">Zinc 900</div><div class="color-hex">#18181B</div></div></div>
+    <div class="color-card"><div class="color-swatch" style="background:#27272A;height:48px"></div><div class="color-info"><div class="color-name">Zinc 800</div><div class="color-hex">#27272A</div></div></div>
+    <div class="color-card"><div class="color-swatch" style="background:#F4F4F5;height:48px"></div><div class="color-info"><div class="color-name">Zinc 100</div><div class="color-hex">#F4F4F5</div></div></div>
+    <div class="color-card"><div class="color-swatch" style="background:#FAFAFA;height:48px"></div><div class="color-info"><div class="color-name">Off White</div><div class="color-hex">#FAFAFA</div></div></div>
+  </div>
+
+  <p style="margin-top:16px"><strong style="color:#E4E4E7">Key rule:</strong> <span style="color:#A78BFA">Gradient is for brand identity only (logo, hero, decorative).</span> All interactive elements use solid Ultraviolet <code style="background:#27272A;padding:2px 6px;border-radius:4px;font-size:0.75rem">#8B5CF6</code>.</p>
+
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn" style="background:#8B5CF6;color:#fff">Primary CTA</button>
+    <button class="btn" style="background:#7C3AED;color:#fff">Hover State</button>
+    <button class="btn-outline" style="border:1px solid #27272A;color:#A1A1AA">Secondary</button>
+    <button class="btn-ghost" style="color:#A78BFA">Tertiary</button>
+    <button class="btn" style="background:#EF4444;color:#fff">Destructive</button>
+  </div>
+  <div class="btn-row">
+    <span class="badge" style="background:rgba(163,230,53,0.1);color:#A3E635">Score 90+</span>
+    <span class="badge" style="background:rgba(245,158,11,0.1);color:#F59E0B">Score 60-89</span>
+    <span class="badge" style="background:rgba(239,68,68,0.1);color:#EF4444">Score &lt;60</span>
+    <span class="badge" style="background:rgba(139,92,246,0.1);color:#A78BFA">Info</span>
+    <span class="badge" style="background:rgba(163,230,53,0.1);color:#A3E635">ATS Safe</span>
+  </div>
+</div>
+
+<hr>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 03 TYPOGRAPHY -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-num">03</div>
+  <h2>Typography</h2>
+  <div class="subtitle">Manrope for headlines. Inter for everything else.</div>
+
+  <div class="type-specimen">
+    <div class="type-label">Manrope — Headlines & Display</div>
+    <div class="type-sample" style="font-family:'Manrope',sans-serif;font-size:2.4rem;font-weight:800;letter-spacing:-0.02em">One base. Infinite variants.</div>
+    <div class="type-sample" style="font-family:'Manrope',sans-serif;font-size:1.4rem;font-weight:700">Build ATS-optimized resumes with AI</div>
+    <div class="type-sample" style="font-family:'Manrope',sans-serif;font-size:1rem;font-weight:600;color:#A1A1AA">Section titles and card headings</div>
+    <div class="type-meta">Manrope 600/700/800 · Google Fonts · Geometric + Humanist</div>
+    <div class="type-alphabet" style="font-family:'Manrope',sans-serif;font-weight:700">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 !@#$%&*</div>
+  </div>
+
+  <div class="type-specimen">
+    <div class="type-label">Inter — Body, UI & Labels</div>
+    <div class="type-sample" style="font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:400">Your resume is probably costing you interviews. ReplugCV analyzes your resume against real ATS parsing logic, identifies gaps, and helps you create role-specific variants from a single base resume.</div>
+    <div class="type-sample" style="font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:500;color:#A1A1AA;margin-top:8px">Navigation labels, button text, form labels, metadata</div>
+    <div class="type-sample" style="font-family:'Inter',sans-serif;font-size:0.65rem;font-weight:600;color:#52525B;letter-spacing:0.08em;text-transform:uppercase;margin-top:8px">EYEBROW / OVERLINE TEXT</div>
+    <div class="type-meta">Inter 400/500/600/700 · Google Fonts · Neo-grotesque</div>
+    <div class="type-alphabet" style="font-family:'Inter',sans-serif">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 !@#$%&*</div>
+  </div>
+
+  <div class="type-specimen">
+    <div class="type-label">Monospace — Data, Scores & Code</div>
+    <div class="type-sample" style="font-family:ui-monospace,'SF Mono',monospace;font-size:0.85rem;color:#A3E635">ATS_SCORE: 92 | KEYWORDS: 12/15 | STATUS: optimized</div>
+    <div class="type-sample" style="font-family:ui-monospace,'SF Mono',monospace;font-size:0.75rem;color:#52525B;margin-top:4px">#8B5CF6 · 0.88rem / 400 · line-height: 1.7</div>
+    <div class="type-meta">System monospace (SF Mono, Menlo, Consolas)</div>
+  </div>
+
+  <p style="margin-top:16px"><strong style="color:#E4E4E7">Scale:</strong></p>
+  <div style="display:grid;grid-template-columns:auto 1fr auto;gap:4px 16px;margin:12px 0;font-size:0.78rem">
+    <span style="color:#52525B">Display</span><span style="font-family:'Manrope',sans-serif;font-weight:800;font-size:2rem;color:#FAFAFA">Aa</span><span style="color:#3F3F46;font-family:monospace">2.4rem / 800</span>
+    <span style="color:#52525B">H1</span><span style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.5rem;color:#FAFAFA">Aa</span><span style="color:#3F3F46;font-family:monospace">1.5rem / 800</span>
+    <span style="color:#52525B">H2</span><span style="font-family:'Manrope',sans-serif;font-weight:700;font-size:1.2rem;color:#FAFAFA">Aa</span><span style="color:#3F3F46;font-family:monospace">1.2rem / 700</span>
+    <span style="color:#52525B">H3</span><span style="font-family:'Manrope',sans-serif;font-weight:700;font-size:1rem;color:#FAFAFA">Aa</span><span style="color:#3F3F46;font-family:monospace">1rem / 700</span>
+    <span style="color:#52525B">Body</span><span style="font-family:'Inter',sans-serif;font-size:0.88rem;color:#D4D4D8">Aa</span><span style="color:#3F3F46;font-family:monospace">0.88rem / 400</span>
+    <span style="color:#52525B">Small</span><span style="font-family:'Inter',sans-serif;font-size:0.78rem;color:#A1A1AA">Aa</span><span style="color:#3F3F46;font-family:monospace">0.78rem / 400</span>
+    <span style="color:#52525B">Caption</span><span style="font-family:'Inter',sans-serif;font-size:0.65rem;color:#71717A">Aa</span><span style="color:#3F3F46;font-family:monospace">0.65rem / 500</span>
+    <span style="color:#52525B">Overline</span><span style="font-family:'Inter',sans-serif;font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8B5CF6">AA</span><span style="color:#3F3F46;font-family:monospace">0.6rem / 600 / caps</span>
+  </div>
+</div>
+
+<hr>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 04 LOGO -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-num">04</div>
+  <h2>Logo</h2>
+  <div class="subtitle">Gradient mark + clean wordmark</div>
+
+  <div class="logo-grid">
+    <div class="logo-variant" style="background:#09090B;border:1px solid rgba(255,255,255,0.04);border-radius:12px">
+      <div class="logo-label">On dark</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="logo-mark" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">R</div>
+        <div class="logo-wordmark" style="color:#FAFAFA">ReplugCV</div>
+      </div>
+    </div>
+    <div class="logo-variant" style="background:#FAFAFA;border:1px solid rgba(0,0,0,0.06);border-radius:12px">
+      <div class="logo-label" style="color:#A1A1AA">On light</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="logo-mark" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">R</div>
+        <div class="logo-wordmark" style="color:#18181B">ReplugCV</div>
+      </div>
+    </div>
+    <div class="logo-variant" style="background:linear-gradient(135deg,#8B5CF6,#EC4899);border-radius:12px">
+      <div class="logo-label" style="color:rgba(255,255,255,0.6)">On brand</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="logo-mark" style="background:rgba(255,255,255,0.2)">R</div>
+        <div class="logo-wordmark" style="color:#fff">ReplugCV</div>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin-top:8px"><strong style="color:#E4E4E7">Rules:</strong> Minimum clear space = half the mark's height on all sides. Never distort, rotate, or apply effects. The gradient direction is always 135° (top-left to bottom-right).</p>
+</div>
+
+<hr>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 05 BRAND VOICE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-num">05</div>
+  <h2>Brand Voice</h2>
+  <div class="subtitle">Direct. Technical. Transparent. Witty, not cute.</div>
+
+  <div class="voice-grid">
+    <div class="voice-card voice-do">
+      <div class="voice-label do">✓ We say</div>
+      <div class="voice-example">"Your resume is probably costing you interviews. Let's fix that."</div>
+    </div>
+    <div class="voice-card voice-dont">
+      <div class="voice-label dont">✗ We don't say</div>
+      <div class="voice-example">"STOP sending bad resumes! You're DESTROYING your career!"</div>
+    </div>
+    <div class="voice-card voice-do">
+      <div class="voice-label do">✓ We say</div>
+      <div class="voice-example">"We built the resume tool we wanted to exist."</div>
+    </div>
+    <div class="voice-card voice-dont">
+      <div class="voice-label dont">✗ We don't say</div>
+      <div class="voice-example">"We're the only resume builder that actually works."</div>
+    </div>
+    <div class="voice-card voice-do">
+      <div class="voice-label do">✓ We say</div>
+      <div class="voice-example">"Here's exactly how your ATS score is calculated. No black boxes."</div>
+    </div>
+    <div class="voice-card voice-dont">
+      <div class="voice-label dont">✗ We don't say</div>
+      <div class="voice-example">"Our proprietary NLP engine leverages transformer architectures..."</div>
+    </div>
+    <div class="voice-card voice-do">
+      <div class="voice-label do">✓ We say</div>
+      <div class="voice-example">"Base resume. Infinite variants. Zero existential dread."</div>
+    </div>
+    <div class="voice-card voice-dont">
+      <div class="voice-label dont">✗ We don't say</div>
+      <div class="voice-example">"Wanna make your resume sparkle? We've got the magic! ✨"</div>
+    </div>
+  </div>
+
+  <p style="margin-top:16px"><strong style="color:#E4E4E7">Words we use:</strong> <span style="color:#A78BFA">variant, base, score, analyze, build, craft, system, transparent, precise</span></p>
+  <p><strong style="color:#E4E4E7">Words we avoid:</strong> <span style="color:#F87171">version, master, rating, scan, create, polish, platform, solution, smart, intelligent</span></p>
+</div>
+
+<hr>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 06 USER PERSONAS -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-num">06</div>
+  <h2>User Personas</h2>
+  <div class="subtitle">Who we're building for — based on market research</div>
+
+  <!-- Persona 1 -->
+  <div class="persona-card">
+    <div class="persona-header">
+      <div class="persona-avatar" style="background:linear-gradient(135deg,#8B5CF6,#6366F1)">AP</div>
+      <div>
+        <div class="persona-name">Ayesha Patel</div>
+        <div class="persona-title">Senior Product Designer, 6 years experience</div>
+        <div>
+          <span class="persona-tag" style="background:rgba(139,92,246,0.1);color:#A78BFA">Primary Persona</span>
+          <span class="persona-tag" style="background:rgba(163,230,53,0.08);color:#A3E635">Design</span>
+        </div>
+      </div>
+    </div>
+    <div class="persona-quote">"I spend more time formatting my resume in Figma than actually applying to jobs. I need something that looks as good as my portfolio but doesn't take 4 hours."</div>
+    <div class="persona-grid">
+      <div class="persona-stat"><div class="persona-stat-label">Age</div><div class="persona-stat-value">29</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Location</div><div class="persona-stat-value">Bengaluru, India</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Salary range</div><div class="persona-stat-value">$40K–80K</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Job apps/month</div><div class="persona-stat-value">15–25</div></div>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">Goals</div>
+      <ul class="persona-list">
+        <li>Land a senior/lead role at a top-tier tech company</li>
+        <li>Showcase impact metrics, not just responsibilities</li>
+        <li>Tailor resume for each application without starting from scratch</li>
+        <li>Resume that reflects her design sensibility — clean, modern, intentional</li>
+      </ul>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">Pain Points</div>
+      <ul class="persona-list">
+        <li>Existing builders produce ugly, generic resumes unworthy of a designer's portfolio</li>
+        <li>Manually tailoring for each job is exhausting — she has 3 Google Docs versions she can't keep straight</li>
+        <li>No idea if her resume passes ATS — applied to 20 roles last month, got 2 callbacks</li>
+        <li>Tried Zety, felt scammed by the pricing model</li>
+      </ul>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">Tools she uses</div>
+      <ul class="persona-list">
+        <li>Figma (designs resume manually), LinkedIn, Notion, Google Docs</li>
+        <li>Has tried: Canva (too generic), Novoresume (decent but limited), Reactive Resume (too dev-focused)</li>
+      </ul>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">What wins her</div>
+      <ul class="persona-list">
+        <li>Beautiful templates that don't compromise ATS compatibility</li>
+        <li>One-click variant creation from a base resume</li>
+        <li>Transparent pricing — no surprise paywalls</li>
+        <li>Product that feels designed, not just developed</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Persona 2 -->
+  <div class="persona-card">
+    <div class="persona-header">
+      <div class="persona-avatar" style="background:linear-gradient(135deg,#EC4899,#F43F5E)">MK</div>
+      <div>
+        <div class="persona-name">Marcus Kim</div>
+        <div class="persona-title">Full-Stack Developer, 4 years experience</div>
+        <div>
+          <span class="persona-tag" style="background:rgba(139,92,246,0.1);color:#A78BFA">Primary Persona</span>
+          <span class="persona-tag" style="background:rgba(59,130,246,0.08);color:#60A5FA">Engineering</span>
+        </div>
+      </div>
+    </div>
+    <div class="persona-quote">"I can build a distributed system but I can't figure out if my resume is getting past the ATS. The whole process feels like a black box."</div>
+    <div class="persona-grid">
+      <div class="persona-stat"><div class="persona-stat-label">Age</div><div class="persona-stat-value">27</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Location</div><div class="persona-stat-value">Toronto, Canada</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Salary range</div><div class="persona-stat-value">$90K–140K</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Job apps/month</div><div class="persona-stat-value">30–50</div></div>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">Goals</div>
+      <ul class="persona-list">
+        <li>Move from mid-level to senior at a FAANG or high-growth startup</li>
+        <li>Optimize resume for ATS without making it look like a plain text file</li>
+        <li>Batch-apply efficiently — needs to tailor for 40+ applications</li>
+        <li>Highlight open-source contributions and side projects prominently</li>
+      </ul>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">Pain Points</div>
+      <ul class="persona-list">
+        <li>Hates WYSIWYG editors — wants structured data, not drag-and-drop</li>
+        <li>Current resume is a LaTeX template that looks technical but may not parse in ATS</li>
+        <li>Applied to 45 jobs last month, 3 responses — suspects ATS is filtering him out</li>
+        <li>Doesn't trust "AI-generated" content — it never sounds like him</li>
+      </ul>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">Tools he uses</div>
+      <ul class="persona-list">
+        <li>VS Code, GitHub, Overleaf/LaTeX, Notion, LinkedIn</li>
+        <li>Has tried: Reactive Resume (liked it, wanted more AI), Standard Resume (too basic), JSON Resume (too manual)</li>
+      </ul>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">What wins him</div>
+      <ul class="persona-list">
+        <li>Git-like versioning — branches/variants feel native to his workflow</li>
+        <li>Transparent ATS scoring with actual parsing breakdown</li>
+        <li>AI that helps him articulate his own work, not generate generic bullets</li>
+        <li>JSON export, keyboard shortcuts, API potential — developer-friendly DNA</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Persona 3 -->
+  <div class="persona-card">
+    <div class="persona-header">
+      <div class="persona-avatar" style="background:linear-gradient(135deg,#F59E0B,#EAB308)">SR</div>
+      <div>
+        <div class="persona-name">Sarah Rodriguez</div>
+        <div class="persona-title">UX Researcher transitioning to Product Management</div>
+        <div>
+          <span class="persona-tag" style="background:rgba(245,158,11,0.1);color:#F59E0B">Secondary Persona</span>
+          <span class="persona-tag" style="background:rgba(163,230,53,0.08);color:#A3E635">Career Changer</span>
+        </div>
+      </div>
+    </div>
+    <div class="persona-quote">"My experience is relevant but my resume tells the wrong story. I need to reframe 5 years of research into product language without lying."</div>
+    <div class="persona-grid">
+      <div class="persona-stat"><div class="persona-stat-label">Age</div><div class="persona-stat-value">32</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Location</div><div class="persona-stat-value">Austin, Texas</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Salary range</div><div class="persona-stat-value">$100K–130K</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Job apps/month</div><div class="persona-stat-value">8–12</div></div>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">Goals</div>
+      <ul class="persona-list">
+        <li>Successfully pivot from UX Research to Product Management</li>
+        <li>Reframe existing experience to match PM job descriptions</li>
+        <li>Highlight transferable skills: stakeholder management, data analysis, user advocacy</li>
+        <li>Each application needs a different emphasis — some PM roles are technical, others strategic</li>
+      </ul>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">Pain Points</div>
+      <ul class="persona-list">
+        <li>Every PM job description is slightly different — one resume can't cover all</li>
+        <li>AI tools keep suggesting "conducted user research" when she needs PM language</li>
+        <li>Worried about appearing underqualified despite relevant transferable experience</li>
+        <li>Needs a mentor/coach to review but can't afford $300+ professional services</li>
+      </ul>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">What wins her</div>
+      <ul class="persona-list">
+        <li>AI that maps her research skills to PM keywords from the job description</li>
+        <li>Base/variant system — one base that branches into "technical PM," "strategic PM," "growth PM"</li>
+        <li>Collaboration features — share with mentor for feedback without emailing PDFs</li>
+        <li>Honest, helpful tone — not a tool that promises miracles</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Persona 4 -->
+  <div class="persona-card">
+    <div class="persona-header">
+      <div class="persona-avatar" style="background:linear-gradient(135deg,#A3E635,#65A30D)">JO</div>
+      <div>
+        <div class="persona-name">James Okonkwo</div>
+        <div class="persona-title">Fresh CS Graduate, 0 years professional experience</div>
+        <div>
+          <span class="persona-tag" style="background:rgba(245,158,11,0.1);color:#F59E0B">Secondary Persona</span>
+          <span class="persona-tag" style="background:rgba(59,130,246,0.08);color:#60A5FA">New Grad</span>
+        </div>
+      </div>
+    </div>
+    <div class="persona-quote">"Every resume template assumes you have 10 years of experience. I have an internship, two class projects, and a hackathon win. How do I make that fill a page?"</div>
+    <div class="persona-grid">
+      <div class="persona-stat"><div class="persona-stat-label">Age</div><div class="persona-stat-value">22</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Location</div><div class="persona-stat-value">Lagos, Nigeria</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Salary range</div><div class="persona-stat-value">$30K–60K</div></div>
+      <div class="persona-stat"><div class="persona-stat-label">Job apps/month</div><div class="persona-stat-value">50–100</div></div>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">Goals</div>
+      <ul class="persona-list">
+        <li>Land first full-time developer role (frontend or full-stack)</li>
+        <li>Make limited experience look impactful — projects, internships, contributions</li>
+        <li>Apply to as many relevant roles as possible while in the application window</li>
+        <li>Stand out from hundreds of other new grads with identical backgrounds</li>
+      </ul>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">Pain Points</div>
+      <ul class="persona-list">
+        <li>Templates designed for seniors make his resume look empty</li>
+        <li>Can't afford $20/month for a resume tool — student budget</li>
+        <li>Applying to 80+ roles — tailoring each one manually is impossible</li>
+        <li>Doesn't know what ATS is or why his applications disappear into a void</li>
+      </ul>
+    </div>
+    <div class="persona-section">
+      <div class="persona-section-title">What wins him</div>
+      <ul class="persona-list">
+        <li>Free tier that's genuinely useful — not a crippled teaser</li>
+        <li>AI that helps frame class projects and internships as professional achievements</li>
+        <li>Templates designed for 0-2 years experience (projects section > experience section)</li>
+        <li>Batch variant creation — paste 10 job links, get 10 tailored resumes</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<hr>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 07 SUMMARY -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" style="text-align:center">
+  <div class="section-num">07</div>
+  <h2>Summary</h2>
+  <div class="subtitle">The brand at a glance</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:left;margin:24px 0">
+    <div style="background:#18181B;padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)">
+      <div style="font-size:0.6rem;font-weight:700;color:#8B5CF6;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Palette</div>
+      <div style="font-size:0.82rem;color:#E4E4E7">Neon Insurgent + solid CTAs</div>
+      <div style="font-size:0.72rem;color:#52525B">Primary #8B5CF6 · Accent #EC4899</div>
+    </div>
+    <div style="background:#18181B;padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)">
+      <div style="font-size:0.6rem;font-weight:700;color:#8B5CF6;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Typography</div>
+      <div style="font-size:0.82rem;color:#E4E4E7;font-family:'Manrope',sans-serif;font-weight:700">Manrope</div>
+      <div style="font-size:0.72rem;color:#52525B">Headlines · Inter for body & UI</div>
+    </div>
+    <div style="background:#18181B;padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)">
+      <div style="font-size:0.6rem;font-weight:700;color:#8B5CF6;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Voice</div>
+      <div style="font-size:0.82rem;color:#E4E4E7">Direct · Technical · Transparent</div>
+      <div style="font-size:0.72rem;color:#52525B">Witty, not cute · Confident, not arrogant</div>
+    </div>
+    <div style="background:#18181B;padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)">
+      <div style="font-size:0.6rem;font-weight:700;color:#8B5CF6;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Personas</div>
+      <div style="font-size:0.82rem;color:#E4E4E7">Designers · Developers</div>
+      <div style="font-size:0.72rem;color:#52525B">Career changers · New graduates</div>
+    </div>
+  </div>
+
+  <div style="margin-top:32px">
+    <div style="display:inline-flex;width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#8B5CF6,#EC4899);align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-size:1.2rem;font-weight:800;color:#fff">R</div>
+    <div style="font-family:'Manrope',sans-serif;font-size:1.4rem;font-weight:800;color:#FAFAFA;margin-top:12px">ReplugCV</div>
+    <div style="font-size:0.85rem;color:#A78BFA;font-style:italic;margin-top:4px">One base. Infinite variants.</div>
+    <div style="font-size:0.65rem;color:#3F3F46;margin-top:16px">Brand Guidelines v1.0 · April 2026 · Confidential</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

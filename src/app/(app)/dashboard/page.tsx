@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/base/buttons/button";
 import { Badge } from "@/components/base/badges/badges";
 import { Plus, Trash01, File06, Copy01, Star01 } from "@untitledui/icons";
-import { cx } from "@/utils/cx";
+// cx removed — not needed on this page
 
 type Resume = {
   id: string;
@@ -123,7 +123,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-display-xs font-semibold text-primary">My Resumes</h1>
+          <h1 className="text-display-xs font-semibold text-primary" style={{ fontFamily: "'Manrope', sans-serif" }}>My Resumes</h1>
           <p className="mt-1 text-sm text-tertiary">Create, manage, and tailor your resumes for every opportunity.</p>
         </div>
         <Button color="primary" size="sm" iconLeading={Plus} onClick={createResume} isLoading={creating}>
@@ -145,7 +145,7 @@ export default function DashboardPage() {
           <div className="flex size-16 items-center justify-center rounded-2xl bg-secondary mb-4">
             <File06 className="size-8 text-fg-quaternary" />
           </div>
-          <h2 className="text-lg font-semibold text-primary mb-1">No resumes yet</h2>
+          <h2 className="text-lg font-semibold text-primary mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>No resumes yet</h2>
           <p className="text-sm text-tertiary mb-6 max-w-xs">
             Create your first resume and start building your professional story.
           </p>

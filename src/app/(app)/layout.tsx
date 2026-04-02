@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import { LayoutGrid01, File06, Palette, Settings01, LogOut01 } from "@untitledui/icons";
+import { File06, Palette, Settings01, LogOut01 } from "@untitledui/icons";
 import { cx } from "@/utils/cx";
 
 const NAV_ITEMS = [
@@ -53,9 +53,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className="fixed top-0 bottom-0 left-0 z-50 flex w-[260px] flex-col border-r border-secondary bg-secondary">
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-secondary">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-brand-solid text-white text-xs font-bold">R</div>
+          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#8B5CF6] to-[#EC4899] text-white text-xs font-extrabold" style={{ fontFamily: "'Manrope', sans-serif" }}>R</div>
           <div>
-            <div className="text-sm font-semibold text-primary">ReplugCV</div>
+            <div className="text-sm font-semibold text-primary" style={{ fontFamily: "'Manrope', sans-serif" }}>ReplugCV</div>
             <div className="text-xs text-tertiary">Free Plan</div>
           </div>
         </div>
