@@ -7,7 +7,7 @@ import { Button } from "@/components/base/buttons/button";
 import { EditorProvider, useEditorContext } from "@/components/editor/editor-context";
 import { EditorTopBar } from "@/components/editor/editor-top-bar";
 import { LeftPanel } from "@/components/editor/panels/left-panel";
-import { ResumePreview } from "@/components/editor/preview/resume-preview";
+import { PaginatedPreview } from "@/components/editor/preview/paginated-preview";
 import { StepForm } from "@/components/editor/wizard/step-form";
 import { TEMPLATES } from "@/components/editor/constants";
 
@@ -17,90 +17,17 @@ import { TEMPLATES } from "@/components/editor/constants";
 
 function EditorInner() {
   const router = useRouter();
-  const { loading, resume, currentStep, goNextStep, goPrevStep, templateId, zoom, setZoom, designSettings, updateDesignSettings, setSelectedBlockId } = useEditorContext();
+  const { loading, resume, currentStep, goNextStep, goPrevStep, templateId, zoom, setZoom, designSettings } = useEditorContext();
 
   const template = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0];
 
-  /* --- Multi-page reflow --- */
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [pageCount, setPageCount] = useState(1);
-  const A4_HEIGHT = 842;
-  const usableHeight = A4_HEIGHT - designSettings.margins.top - designSettings.margins.bottom;
-
-  const measurePages = useCallback(() => {
-    if (!contentRef.current) return;
-    // Use getBoundingClientRect on the content div for accurate height measurement
-    const contentRect = contentRef.current.getBoundingClientRect();
-    // Account for the zoom transform — divide by zoom to get unscaled height
-    const contentHeight = contentRect.height / zoom;
-    // Content must exceed page height by at least 40px to warrant a second page
-    const buffer = 40;
-    const effectiveHeight = Math.max(0, contentHeight - buffer);
-    setPageCount(Math.max(1, Math.ceil(effectiveHeight / usableHeight)));
-  }, [usableHeight, zoom]);
-
-  useEffect(() => {
-    measurePages();
-    const el = contentRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(measurePages);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [measurePages]);
+  /* Page count is tracked by PaginatedPreview internally */
 
   /* --- Resizable split panels --- */
   const splitContainerRef = useRef<HTMLDivElement>(null);
   const [splitPercent, setSplitPercent] = useState(45); // 45% form, 55% preview
   const [isDragging, setIsDragging] = useState(false);
 
-  /* --- Active margin highlight from settings panel or drag --- */
-  const [activeMargin, setActiveMargin] = useState<string | null>(null);
-  const [draggingMargin, setDraggingMargin] = useState<string | null>(null);
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail as string | null;
-      setActiveMargin(detail);
-    };
-    window.addEventListener("replugcv:activeMargin", handler);
-    return () => window.removeEventListener("replugcv:activeMargin", handler);
-  }, []);
-
-  /* --- Draggable margin handles --- */
-  const handleMarginDragStart = useCallback(
-    (edge: "top" | "bottom" | "left" | "right", e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setDraggingMargin(edge);
-      setActiveMargin(edge);
-
-      const startY = e.clientY;
-      const startX = e.clientX;
-      const startValue = designSettings.margins[edge];
-
-      const onMove = (ev: MouseEvent) => {
-        let delta: number;
-        if (edge === "top") delta = (ev.clientY - startY) / zoom;
-        else if (edge === "bottom") delta = -(ev.clientY - startY) / zoom;
-        else if (edge === "left") delta = (ev.clientX - startX) / zoom;
-        else delta = -(ev.clientX - startX) / zoom;
-
-        const newValue = Math.round(Math.max(10, Math.min(60, startValue + delta)));
-        updateDesignSettings({ margins: { ...designSettings.margins, [edge]: newValue } });
-      };
-
-      const onUp = () => {
-        setDraggingMargin(null);
-        setActiveMargin(null);
-        window.removeEventListener("mousemove", onMove);
-        window.removeEventListener("mouseup", onUp);
-      };
-
-      window.addEventListener("mousemove", onMove);
-      window.addEventListener("mouseup", onUp);
-    },
-    [designSettings.margins, zoom, updateDesignSettings]
-  );
 
   const handleDragStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -177,35 +104,6 @@ function EditorInner() {
     );
   }
 
-  /* --- Margin overlay helper --- */
-  const marginOverlays = activeMargin ? (
-    <>
-      {activeMargin === "top" && (
-        <div
-          className="absolute top-0 left-0 right-0 pointer-events-none z-10"
-          style={{ height: designSettings.margins.top, backgroundColor: "rgba(22, 163, 74, 0.12)" }}
-        />
-      )}
-      {activeMargin === "bottom" && (
-        <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
-          style={{ height: designSettings.margins.bottom, backgroundColor: "rgba(22, 163, 74, 0.12)" }}
-        />
-      )}
-      {activeMargin === "left" && (
-        <div
-          className="absolute top-0 bottom-0 left-0 pointer-events-none z-10"
-          style={{ width: designSettings.margins.left, backgroundColor: "rgba(22, 163, 74, 0.12)" }}
-        />
-      )}
-      {activeMargin === "right" && (
-        <div
-          className="absolute top-0 bottom-0 right-0 pointer-events-none z-10"
-          style={{ width: designSettings.margins.right, backgroundColor: "rgba(22, 163, 74, 0.12)" }}
-        />
-      )}
-    </>
-  ) : null;
 
   return (
     <div className="fixed inset-0 flex">
@@ -304,106 +202,11 @@ function EditorInner() {
                     {z}%
                   </button>
                 ))}
-                <span className="text-xs text-gray-400 ml-1">Page {pageCount > 0 ? 1 : 0} of {pageCount}</span>
               </div>
             </div>
 
-            {/* Scrollable preview — click background to deselect */}
-            <div className="flex-1 flex items-start justify-center p-6 overflow-y-auto scrollbar-thin" onClick={() => setSelectedBlockId(null)}>
-              <div
-                className="relative"
-                style={{ width: 595 * zoom }}
-              >
-                <div
-                  style={{
-                    width: 595,
-                    transform: `scale(${zoom})`,
-                    transformOrigin: "top left",
-                  }}
-                >
-                  {/* Single A4 page with content — grows naturally */}
-                  <div
-                    className="bg-white rounded-lg shadow-lg relative"
-                    style={{
-                      width: 595,
-                      minHeight: A4_HEIGHT,
-                      fontFamily: `'${designSettings.fontFamily}', ${template.bodyFont}`,
-                      fontSize: designSettings.baseFontSize + "px",
-                      lineHeight: designSettings.lineHeight,
-                      color: "#111827",
-                    }}
-                  >
-                    {/* Margin overlays */}
-                    {marginOverlays}
-
-                    {/* Draggable margin handles */}
-                    <div
-                      className="absolute top-0 left-0 right-0 z-20 cursor-ns-resize group/mh"
-                      style={{ height: designSettings.margins.top }}
-                      onMouseDown={(e) => handleMarginDragStart("top", e)}
-                    >
-                      <div className="absolute bottom-0 left-[20%] right-[20%] h-[2px] bg-transparent group-hover/mh:bg-[#059669]/40 transition-colors" />
-                    </div>
-                    <div
-                      className="absolute bottom-0 left-0 right-0 z-20 cursor-ns-resize group/mh"
-                      style={{ height: designSettings.margins.bottom }}
-                      onMouseDown={(e) => handleMarginDragStart("bottom", e)}
-                    >
-                      <div className="absolute top-0 left-[20%] right-[20%] h-[2px] bg-transparent group-hover/mh:bg-[#059669]/40 transition-colors" />
-                    </div>
-                    <div
-                      className="absolute top-0 bottom-0 left-0 z-20 cursor-ew-resize group/mh"
-                      style={{ width: designSettings.margins.left }}
-                      onMouseDown={(e) => handleMarginDragStart("left", e)}
-                    >
-                      <div className="absolute right-0 top-[20%] bottom-[20%] w-[2px] bg-transparent group-hover/mh:bg-[#059669]/40 transition-colors" />
-                    </div>
-                    <div
-                      className="absolute top-0 bottom-0 right-0 z-20 cursor-ew-resize group/mh"
-                      style={{ width: designSettings.margins.right }}
-                      onMouseDown={(e) => handleMarginDragStart("right", e)}
-                    >
-                      <div className="absolute left-0 top-[20%] bottom-[20%] w-[2px] bg-transparent group-hover/mh:bg-[#059669]/40 transition-colors" />
-                    </div>
-
-                    {/* Content — rendered ONCE, grows naturally */}
-                    <div
-                      ref={contentRef}
-                      style={{
-                        paddingTop: designSettings.margins.top,
-                        paddingBottom: designSettings.margins.bottom,
-                        paddingLeft: designSettings.margins.left,
-                        paddingRight: designSettings.margins.right,
-                      }}
-                    >
-                      <ResumePreview />
-                    </div>
-
-                    {/* Page break indicator lines */}
-                    {pageCount > 1 && Array.from({ length: pageCount - 1 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="absolute left-0 right-0 z-10 flex items-center pointer-events-none"
-                        style={{ top: A4_HEIGHT * (i + 1) }}
-                      >
-                        <div className="flex-1 border-t-2 border-dashed border-red-300/50" />
-                        <span className="px-2 text-[9px] text-red-400 bg-white rounded-full shrink-0">
-                          Page break
-                        </span>
-                        <div className="flex-1 border-t-2 border-dashed border-red-300/50" />
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Page count indicator */}
-                  <div className="text-center py-2">
-                    <span className="text-[10px] text-gray-400">
-                      {pageCount === 1 ? "Page 1 of 1" : `${pageCount} pages — content exceeds A4`}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Paginated preview — handles pages, scrolling, navigation */}
+            <PaginatedPreview zoom={zoom} />
           </div>
         </div>
       </div>
