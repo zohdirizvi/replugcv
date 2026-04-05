@@ -17,7 +17,7 @@ import { TEMPLATES } from "@/components/editor/constants";
 
 function EditorInner() {
   const router = useRouter();
-  const { loading, resume, currentStep, goNextStep, goPrevStep, templateId, zoom, setZoom, designSettings, updateDesignSettings } = useEditorContext();
+  const { loading, resume, currentStep, goNextStep, goPrevStep, templateId, zoom, setZoom, designSettings, updateDesignSettings, setSelectedBlockId } = useEditorContext();
 
   const template = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0];
 
@@ -308,8 +308,8 @@ function EditorInner() {
               </div>
             </div>
 
-            {/* Scrollable preview — single content render, no duplication */}
-            <div className="flex-1 flex items-start justify-center p-6 overflow-y-auto scrollbar-thin">
+            {/* Scrollable preview — click background to deselect */}
+            <div className="flex-1 flex items-start justify-center p-6 overflow-y-auto scrollbar-thin" onClick={() => setSelectedBlockId(null)}>
               <div
                 className="relative"
                 style={{ width: 595 * zoom }}

@@ -62,11 +62,18 @@ function BlockWrapper({
       onClick={(e) => {
         e.stopPropagation();
         const target = e.target as HTMLElement;
-        // Toggle: clicking the already-selected section deselects it
+
+        // If clicking on editable content inside an already-selected section,
+        // keep the selection — don't toggle off
+        if (isSelected && target.isContentEditable) return;
+
+        // If clicking the non-editable part of an already-selected section, deselect
         if (isSelected) {
           onSelect(null);
           return;
         }
+
+        // Select this section and navigate to its wizard step
         onSelect(block.id);
         const step = stepMap[block.type];
         if (step) onNavigateToStep(step);
