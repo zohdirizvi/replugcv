@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/base/buttons/button";
 import {
@@ -80,9 +80,58 @@ function timeAgo(dateStr: string): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-/* ── Mini Resume Preview ── */
+/* ── Scaled A4 Preview Container ── */
 
-function MiniResumePreview({ blocks, accentColor }: { blocks: ResumeBlock[]; accentColor: string }) {
+function ScaledA4Preview({ children }: { children: React.ReactNode }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const inner = innerRef.current;
+    if (!container || !inner) return;
+
+    const updateScale = () => {
+      const scale = container.offsetWidth / A4_W;
+      inner.style.transform = `scale(${scale})`;
+    };
+
+    updateScale();
+    const ro = new ResizeObserver(updateScale);
+    ro.observe(container);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative overflow-hidden w-full bg-white"
+      style={{ aspectRatio: `${A4_W} / ${A4_H}` }}
+    >
+      <div
+        ref={innerRef}
+        className="absolute top-0 left-0 origin-top-left"
+        style={{ width: A4_W, height: A4_H }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ── Resume Card Thumbnail ── */
+
+/*
+  Renders a full A4 page (595×842) scaled down to fit the card.
+  The card container sets the visible size; the inner div renders at
+  full A4 then CSS-transforms to fit. This produces a crisp, readable
+  miniature exactly like Builder.io's resume cards.
+*/
+
+const A4_W = 595;
+const A4_H = 842;
+
+function ResumeCardThumbnail({ blocks, accentColor }: { blocks: ResumeBlock[]; accentColor: string }) {
   const visible = blocks.filter((b) => b.is_visible !== false).sort((a, b) => a.sort_order - b.sort_order);
   const header = visible.find((b) => b.type === "header");
   const contact = visible.find((b) => b.type === "contact");
@@ -101,123 +150,106 @@ function MiniResumePreview({ blocks, accentColor }: { blocks: ResumeBlock[]; acc
 
   const hasContent = name || title || summaryText || expItems.length > 0;
 
-  if (!hasContent) {
-    // Empty resume — show wireframe placeholder
-    return (
-      <div className="w-full h-full flex items-center justify-center p-4">
-        <div className="w-full max-w-[140px] space-y-2">
-          <div className="h-2 w-3/4 rounded bg-gray-300/40" />
-          <div className="h-1.5 w-1/2 rounded bg-gray-200/40" />
-          <div className="h-px w-full bg-gray-200/30 my-1.5" />
-          <div className="h-1 w-full rounded bg-gray-200/30" />
-          <div className="h-1 w-5/6 rounded bg-gray-200/30" />
-          <div className="h-1 w-full rounded bg-gray-200/30" />
-          <div className="h-1 w-2/3 rounded bg-gray-200/30" />
-        </div>
-      </div>
-    );
-  }
-
-  // Render actual resume content as a miniature
   return (
     <div
-      className="w-[595px] origin-top-left overflow-hidden"
       style={{
-        transform: "scale(0.22)",
-        height: 842,
+        width: A4_W,
+        height: A4_H,
         fontFamily: "'Inter', sans-serif",
         fontSize: 12,
         lineHeight: 1.5,
-        padding: "40px",
+        padding: 40,
         color: "#717180",
+        backgroundColor: "#FFFFFF",
       }}
     >
-      {/* Header */}
-      {name && (
-        <p style={{ fontSize: 20, fontWeight: 600, color: accentColor, lineHeight: 1.2 }}>{name}</p>
-      )}
-      {title && (
-        <p style={{ fontSize: 14, fontWeight: 500, color: "#717180", marginTop: 2 }}>{title}</p>
-      )}
-
-      {/* Contact */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 10px", marginTop: 8 }}>
-        {["email", "phone", "location", "website", "linkedin"].map((key) => {
-          const val = contactFields[key] as string;
-          if (!val) return null;
-          return (
-            <span key={key} style={{ fontSize: 10, color: "#717180" }}>
-              <span style={{ color: accentColor }}>&#x2022; </span>{val}
-            </span>
-          );
-        })}
-      </div>
-
-      {/* Divider */}
-      <div style={{ borderBottom: "1px solid #E5E7EB", margin: "10px 0" }} />
-
-      {/* Summary */}
-      {summaryText && (
+      {!hasContent ? (
+        /* Empty wireframe */
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 20 }}>
+          <div style={{ width: "55%", height: 10, borderRadius: 3, backgroundColor: "#E5E7EB" }} />
+          <div style={{ width: "35%", height: 7, borderRadius: 3, backgroundColor: "#F3F4F6" }} />
+          <div style={{ width: "100%", height: 1, backgroundColor: "#F3F4F6", margin: "8px 0" }} />
+          <div style={{ width: "30%", height: 6, borderRadius: 3, backgroundColor: "#E5E7EB" }} />
+          <div style={{ width: "100%", height: 5, borderRadius: 3, backgroundColor: "#F3F4F6" }} />
+          <div style={{ width: "90%", height: 5, borderRadius: 3, backgroundColor: "#F3F4F6" }} />
+          <div style={{ width: "75%", height: 5, borderRadius: 3, backgroundColor: "#F3F4F6" }} />
+          <div style={{ width: "100%", height: 1, backgroundColor: "#F3F4F6", margin: "8px 0" }} />
+          <div style={{ width: "25%", height: 6, borderRadius: 3, backgroundColor: "#E5E7EB" }} />
+          <div style={{ width: "100%", height: 5, borderRadius: 3, backgroundColor: "#F3F4F6" }} />
+          <div style={{ width: "85%", height: 5, borderRadius: 3, backgroundColor: "#F3F4F6" }} />
+          <div style={{ width: "65%", height: 5, borderRadius: 3, backgroundColor: "#F3F4F6" }} />
+        </div>
+      ) : (
         <>
-          <p style={{ fontSize: 14, fontWeight: 600, color: accentColor, marginBottom: 4 }}>Summary</p>
-          <p style={{ fontSize: 11, color: "#717180", lineHeight: 1.5 }}>
-            {summaryText.length > 200 ? summaryText.slice(0, 200) + "..." : summaryText}
-          </p>
-          <div style={{ borderBottom: "1px solid #E5E7EB", margin: "10px 0" }} />
-        </>
-      )}
+          {name && <p style={{ fontSize: 20, fontWeight: 600, color: accentColor, lineHeight: 1.2, margin: 0 }}>{name}</p>}
+          {title && <p style={{ fontSize: 14, fontWeight: 500, color: "#717180", marginTop: 2 }}>{title}</p>}
 
-      {/* Education */}
-      {eduItems.length > 0 && (
-        <>
-          <p style={{ fontSize: 14, fontWeight: 600, color: accentColor, marginBottom: 4 }}>Education</p>
-          {eduItems.slice(0, 2).map((item, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 600, color: "#717180" }}>{(item.degree as string) || "Degree"}</p>
-                <p style={{ fontSize: 11, color: "#717180" }}>{(item.school as string) || ""}</p>
-              </div>
-              <p style={{ fontSize: 11, fontWeight: 500, color: "#717180", flexShrink: 0 }}>
-                {(item.startYear as string) || ""}{(item.startYear as string) && (item.endYear as string) ? " - " : ""}{(item.endYear as string) || ""}
-              </p>
-            </div>
-          ))}
-          <div style={{ borderBottom: "1px solid #E5E7EB", margin: "10px 0" }} />
-        </>
-      )}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 10px", marginTop: 8 }}>
+            {["email", "phone", "location", "website", "linkedin"].map((key) => {
+              const val = contactFields[key] as string;
+              if (!val) return null;
+              return <span key={key} style={{ fontSize: 10, color: "#717180" }}><span style={{ color: accentColor }}>{"\u2022 "}</span>{val}</span>;
+            })}
+          </div>
 
-      {/* Experience */}
-      {expItems.length > 0 && (
-        <>
-          <p style={{ fontSize: 14, fontWeight: 600, color: accentColor, marginBottom: 4 }}>Experience</p>
-          {expItems.slice(0, 2).map((item, i) => (
-            <div key={i} style={{ marginBottom: 8 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <p style={{ fontSize: 11, fontWeight: 600, color: "#717180" }}>
-                  {(item.role as string) || ""}{(item.role as string) && (item.company as string) ? ", " : ""}{(item.company as string) || ""}
-                </p>
-                <p style={{ fontSize: 11, fontWeight: 500, color: "#717180", flexShrink: 0 }}>
-                  {(item.startDate as string) || ""}{(item.startDate as string) && (item.endDate as string) ? " - " : ""}{(item.endDate as string) || ""}
-                </p>
-              </div>
-              {(item.description as string) && (
-                <p style={{ fontSize: 10, color: "#717180", marginTop: 2, lineHeight: 1.4 }}>
-                  {((item.description as string) || "").slice(0, 120)}...
-                </p>
-              )}
-            </div>
-          ))}
-          <div style={{ borderBottom: "1px solid #E5E7EB", margin: "10px 0" }} />
-        </>
-      )}
+          <div style={{ borderBottom: "1px solid #E5E7EB", margin: "12px 0" }} />
 
-      {/* Skills */}
-      {skillItems.length > 0 && (
-        <>
-          <p style={{ fontSize: 14, fontWeight: 600, color: accentColor, marginBottom: 4 }}>Skills</p>
-          <p style={{ fontSize: 11, fontWeight: 600, color: "#717180" }}>
-            {skillItems.join(", ")}
-          </p>
+          {summaryText && (
+            <>
+              <p style={{ fontSize: 14, fontWeight: 600, color: accentColor, marginBottom: 4 }}>Summary</p>
+              <p style={{ fontSize: 11, color: "#717180", lineHeight: 1.5 }}>{summaryText.length > 250 ? summaryText.slice(0, 250) + "..." : summaryText}</p>
+              <div style={{ borderBottom: "1px solid #E5E7EB", margin: "12px 0" }} />
+            </>
+          )}
+
+          {eduItems.length > 0 && (
+            <>
+              <p style={{ fontSize: 14, fontWeight: 600, color: accentColor, marginBottom: 6 }}>Education</p>
+              {eduItems.slice(0, 2).map((item, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <div>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: "#717180" }}>{(item.degree as string) || ""}</p>
+                    <p style={{ fontSize: 11, color: "#717180" }}>{(item.school as string) || ""}</p>
+                  </div>
+                  <p style={{ fontSize: 11, fontWeight: 500, color: "#717180", flexShrink: 0 }}>
+                    {(item.startYear as string) || ""}{(item.startYear as string) && (item.endYear as string) ? " - " : ""}{(item.endYear as string) || ""}
+                  </p>
+                </div>
+              ))}
+              <div style={{ borderBottom: "1px solid #E5E7EB", margin: "12px 0" }} />
+            </>
+          )}
+
+          {expItems.length > 0 && (
+            <>
+              <p style={{ fontSize: 14, fontWeight: 600, color: accentColor, marginBottom: 6 }}>Experience</p>
+              {expItems.slice(0, 3).map((item, i) => (
+                <div key={i} style={{ marginBottom: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: "#717180" }}>
+                      {(item.role as string) || ""}{(item.role as string) && (item.company as string) ? ", " : ""}{(item.company as string) || ""}
+                    </p>
+                    <p style={{ fontSize: 11, fontWeight: 500, color: "#717180", flexShrink: 0 }}>
+                      {(item.startDate as string) || ""}{(item.startDate as string) && (item.endDate as string) ? " - " : ""}{(item.endDate as string) || ""}
+                    </p>
+                  </div>
+                  {(item.description as string) && (
+                    <p style={{ fontSize: 10, color: "#717180", marginTop: 3, lineHeight: 1.5 }}>
+                      {((item.description as string) || "").slice(0, 180)}{((item.description as string) || "").length > 180 ? "..." : ""}
+                    </p>
+                  )}
+                </div>
+              ))}
+              <div style={{ borderBottom: "1px solid #E5E7EB", margin: "12px 0" }} />
+            </>
+          )}
+
+          {skillItems.length > 0 && (
+            <>
+              <p style={{ fontSize: 14, fontWeight: 600, color: accentColor, marginBottom: 4 }}>Skills</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "#717180" }}>{skillItems.join(", ")}</p>
+            </>
+          )}
         </>
       )}
     </div>
@@ -533,7 +565,7 @@ export default function DashboardPage() {
               onClick={createResume}
               disabled={creating}
               className="group flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-secondary bg-transparent cursor-pointer transition hover:border-[#8B5CF6]/40 hover:bg-[#8B5CF6]/4"
-              style={{ minHeight: 280 }}
+              style={{ aspectRatio: `${A4_W} / ${A4_H}` }}
             >
               <div className="flex size-12 items-center justify-center rounded-xl bg-secondary group-hover:bg-[#8B5CF6]/10 transition">
                 <Plus className="size-6 text-fg-quaternary group-hover:text-[#8B5CF6] transition" />
@@ -549,18 +581,16 @@ export default function DashboardPage() {
             viewMode === "grid" ? (
               <div
                 key={r.id}
-                className="group relative flex flex-col rounded-xl border border-secondary bg-primary shadow-xs transition hover:border-[#8B5CF6]/20 hover:shadow-md cursor-pointer overflow-hidden"
+                className="group relative flex flex-col rounded-xl border border-secondary bg-white shadow-xs transition hover:shadow-lg hover:border-[#8B5CF6]/25 cursor-pointer overflow-hidden"
                 onClick={() => window.location.href = `/editor/${r.id}`}
               >
-                {/* Live resume preview thumbnail */}
-                <div className="relative bg-white overflow-hidden" style={{ height: 190 }}>
-                  <MiniResumePreview blocks={r.blocks} accentColor={getAccentColor(r)} />
-                  {/* Fade overlay at bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent" />
-                </div>
+                {/* A4 resume preview — full page scaled to fit card */}
+                <ScaledA4Preview>
+                  <ResumeCardThumbnail blocks={r.blocks} accentColor={getAccentColor(r)} />
+                </ScaledA4Preview>
 
                 {/* Info bar */}
-                <div className="p-3 border-t border-secondary flex items-center justify-between">
+                <div className="px-3 py-2.5 flex items-center justify-between border-t border-gray-100">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
                       <h3 className="text-sm font-semibold text-primary truncate">{r.title}</h3>
@@ -611,9 +641,9 @@ export default function DashboardPage() {
                 onClick={() => window.location.href = `/editor/${r.id}`}
               >
                 {/* Mini thumbnail */}
-                <div className="shrink-0 rounded-lg bg-white border border-secondary overflow-hidden" style={{ width: 48, height: 64 }}>
-                  <div style={{ transform: "scale(0.08)", transformOrigin: "top left", width: 595, height: 842 }}>
-                    <MiniResumePreview blocks={r.blocks} accentColor={getAccentColor(r)} />
+                <div className="shrink-0 rounded-lg bg-white border border-secondary overflow-hidden" style={{ width: 48, height: 68 }}>
+                  <div style={{ width: A4_W, height: A4_H, transform: `scale(${48 / A4_W})`, transformOrigin: "top left" }}>
+                    <ResumeCardThumbnail blocks={r.blocks} accentColor={getAccentColor(r)} />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
