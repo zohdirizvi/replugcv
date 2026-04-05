@@ -82,7 +82,7 @@ function BlockWrapper({
       className={cx(
         "relative cursor-pointer transition-all group/section",
         isSelected
-          ? "border-l-2 border border-[#065f46] rounded-[4px] px-3 py-1"
+          ? "border-l-2 border border-[#065f46] rounded-[4px] px-3 pt-1 pb-8 mb-4"
           : ""
       )}
       style={{

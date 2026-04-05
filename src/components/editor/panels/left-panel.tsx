@@ -4,6 +4,7 @@ import { Home03 } from "@untitledui/icons";
 import { useEditorContext } from "../editor-context";
 import { ProgressStepper } from "../wizard/progress-stepper";
 import { SettingsPanel } from "./settings-panel";
+import { TemplatesPanel } from "./templates-panel";
 import { useRouter } from "next/navigation";
 
 export function LeftPanel() {
@@ -56,6 +57,8 @@ export function LeftPanel() {
       {/* Tab content */}
       {activeTab === "settings" ? (
         <SettingsPanel />
+      ) : activeTab === "templates" ? (
+        <TemplatesPanel />
       ) : (
         <ProgressStepper />
       )}
