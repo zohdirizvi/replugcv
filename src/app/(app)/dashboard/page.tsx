@@ -48,13 +48,6 @@ type ResumeWithBlocks = Resume & {
 
 /* ── Helpers ── */
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good Morning";
-  if (hour < 17) return "Good Afternoon";
-  return "Good Evening";
-}
-
 function timeAgo(dateStr: string): string {
   const now = new Date();
   const date = new Date(dateStr);
@@ -392,17 +385,28 @@ export default function DashboardPage() {
 
   return (
     <>
-      {/* Greeting */}
-      <div className="mb-8">
-        <h1
-          className="text-[28px] font-bold text-primary"
-          style={{ fontFamily: "'Manrope', sans-serif" }}
+      {/* Greeting + New Resume button */}
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1
+            className="text-[28px] font-bold text-primary"
+            style={{ fontFamily: "'Manrope', sans-serif" }}
+          >
+            Hello, {firstName}!
+          </h1>
+          <p className="mt-1 text-sm text-tertiary">
+            What&apos;s on your mind?
+          </p>
+        </div>
+        <button
+          onClick={createResume}
+          disabled={creating}
+          className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white border-none cursor-pointer hover:opacity-90 transition-opacity shrink-0"
+          style={{ backgroundColor: "#059669" }}
         >
-          {getGreeting()}, {firstName}!
-        </h1>
-        <p className="mt-1 text-sm text-tertiary">
-          A new day, a new opportunity! Let&apos;s create something amazing together.
-        </p>
+          <File06 className="size-4" />
+          {creating ? "Creating..." : "New Resume"}
+        </button>
       </div>
 
       {/* Action cards */}
@@ -559,35 +563,20 @@ export default function DashboardPage() {
             ? "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
             : "flex flex-col gap-2"
         )}>
-          {/* Create new card */}
-          {viewMode === "grid" && (
-            <button
-              onClick={createResume}
-              disabled={creating}
-              className="group flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-secondary bg-transparent cursor-pointer transition hover:border-[#8B5CF6]/40 hover:bg-[#8B5CF6]/4"
-              style={{ aspectRatio: `${A4_W} / ${A4_H}` }}
-            >
-              <div className="flex size-12 items-center justify-center rounded-xl bg-secondary group-hover:bg-[#8B5CF6]/10 transition">
-                <Plus className="size-6 text-fg-quaternary group-hover:text-[#8B5CF6] transition" />
-              </div>
-              <span className="text-sm font-medium text-tertiary group-hover:text-[#8B5CF6] transition">
-                {creating ? "Creating..." : "Create New Resume"}
-              </span>
-            </button>
-          )}
-
           {/* Resume cards */}
           {resumes.map((r) =>
             viewMode === "grid" ? (
               <div
                 key={r.id}
-                className="group relative flex flex-col rounded-xl border border-secondary bg-white shadow-xs transition hover:shadow-lg hover:border-[#8B5CF6]/25 cursor-pointer overflow-hidden"
+                className="group relative flex flex-col rounded-xl border border-secondary bg-white shadow-xs transition hover:shadow-lg hover:border-[#8B5CF6]/25 cursor-pointer"
                 onClick={() => window.location.href = `/editor/${r.id}`}
               >
                 {/* A4 resume preview — full page scaled to fit card */}
-                <ScaledA4Preview>
-                  <ResumeCardThumbnail blocks={r.blocks} accentColor={getAccentColor(r)} />
-                </ScaledA4Preview>
+                <div className="rounded-t-xl overflow-hidden">
+                  <ScaledA4Preview>
+                    <ResumeCardThumbnail blocks={r.blocks} accentColor={getAccentColor(r)} />
+                  </ScaledA4Preview>
+                </div>
 
                 {/* Info bar */}
                 <div className="px-3 py-2.5 flex items-center justify-between border-t border-gray-100">
@@ -613,15 +602,22 @@ export default function DashboardPage() {
 
                     {menuOpen === r.id && (
                       <div
-                        className="absolute right-0 top-9 z-50 w-36 rounded-lg border border-secondary bg-primary shadow-lg py-1"
+                        className="absolute right-0 bottom-10 z-50 w-40 rounded-lg border border-secondary bg-primary shadow-lg py-1"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
+                          onClick={() => { setMenuOpen(null); window.location.href = `/editor/${r.id}`; }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-secondary transition cursor-pointer border-none bg-transparent text-left"
+                        >
+                          <File06 className="size-3.5" /> Open
+                        </button>
+                        <button
                           onClick={() => { setMenuOpen(null); duplicateResume(r); }}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-sm text-secondary hover:bg-secondary transition cursor-pointer border-none bg-transparent text-left"
+                          className="flex w-full items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-secondary transition cursor-pointer border-none bg-transparent text-left"
                         >
                           <Copy01 className="size-3.5" /> Duplicate
                         </button>
+                        <div className="my-1 border-t border-secondary" />
                         <button
                           onClick={() => { setMenuOpen(null); deleteResume(r.id, r.title); }}
                           className="flex w-full items-center gap-2 px-3 py-2 text-sm text-error-primary hover:bg-secondary transition cursor-pointer border-none bg-transparent text-left"
@@ -665,15 +661,22 @@ export default function DashboardPage() {
                   </button>
                   {menuOpen === r.id && (
                     <div
-                      className="absolute right-0 top-9 z-50 w-36 rounded-lg border border-secondary bg-primary shadow-lg py-1"
+                      className="absolute right-0 bottom-10 z-50 w-40 rounded-lg border border-secondary bg-primary shadow-lg py-1"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
+                        onClick={() => { setMenuOpen(null); window.location.href = `/editor/${r.id}`; }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-secondary transition cursor-pointer border-none bg-transparent text-left"
+                      >
+                        <File06 className="size-3.5" /> Open
+                      </button>
+                      <button
                         onClick={() => { setMenuOpen(null); duplicateResume(r); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-secondary hover:bg-secondary transition cursor-pointer border-none bg-transparent text-left"
+                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-secondary transition cursor-pointer border-none bg-transparent text-left"
                       >
                         <Copy01 className="size-3.5" /> Duplicate
                       </button>
+                      <div className="my-1 border-t border-secondary" />
                       <button
                         onClick={() => { setMenuOpen(null); deleteResume(r.id, r.title); }}
                         className="flex w-full items-center gap-2 px-3 py-2 text-sm text-error-primary hover:bg-secondary transition cursor-pointer border-none bg-transparent text-left"
