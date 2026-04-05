@@ -13,6 +13,8 @@ type EditableTextProps = {
   tag?: "h1" | "h2" | "p" | "span" | "li";
   placeholderClassName?: string;
   style?: React.CSSProperties;
+  /** AI-editable field identifier — when set, an AI CTA will render based on user plan */
+  aiField?: string;
 };
 
 /* ---- Mini formatting toolbar (B/I/U/Link) ---- */

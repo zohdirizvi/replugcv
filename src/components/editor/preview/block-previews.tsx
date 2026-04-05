@@ -266,6 +266,7 @@ export function BlockPreview({
           style={{ fontSize: "1em", color: BODY_COLOR }}
           multiline
           showToolbar
+          aiField="summary"
         />
         <SectionDivider />
       </div>
@@ -387,6 +388,7 @@ export function BlockPreview({
               style={{ fontSize: "1em", color: BODY_COLOR }}
               multiline
               showToolbar
+              aiField="experience.description"
             />
             {((item.bullets as string[]) || []).length > 0 && (
               <ul className="mt-1 list-disc pl-5 leading-relaxed" style={{ fontSize: "1em", color: BODY_COLOR }}>
