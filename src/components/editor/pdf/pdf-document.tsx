@@ -542,39 +542,87 @@ export function PdfDocument({ blocks, templateStyles, designSettings, userPlan }
   const dividerStyle = ts.dividerStyle || "line";
   const isTwoColumn = ts.layout === "two-column";
 
-  /* ─── Watermark (shared) ─── */
+  /* ─── Fixed elements on every page ─── */
+
+  // Page number — bottom right of every page
+  const pageNumber = (
+    <Text
+      style={{
+        position: "absolute",
+        bottom: Math.max(12, ds.margins.bottom / 3),
+        right: ds.margins.right,
+        fontSize: 9,
+        color: "#C4C4CC",
+      }}
+      fixed
+      render={({ pageNumber: pn, totalPages }) => (
+        totalPages > 1 ? `${pn} / ${totalPages}` : ""
+      )}
+    />
+  );
+
+  // Watermark for free users
   const watermark = userPlan === "free" ? (
     <Text
-      style={{ position: "absolute", bottom: 16, right: 20, fontSize: 8, color: "#9CA3AF", opacity: 0.5 }}
+      style={{
+        position: "absolute",
+        bottom: Math.max(12, ds.margins.bottom / 3),
+        left: ds.margins.left,
+        fontSize: 8,
+        color: "#9CA3AF",
+        opacity: 0.5,
+      }}
       fixed
     >
       Built with ReplugCV
     </Text>
   ) : null;
 
+  /* ─── Page style with reduced margins for page 2+ ─── */
+  // @react-pdf Page style applies uniformly, but we can use a View
+  // wrapper with dynamic top padding to simulate reduced margins.
+  // The trick: set page padding to the SMALLER margin (page 2+),
+  // then add extra top padding on the first content block only.
+
+  const page1TopMargin = ds.margins.top;
+  const pageNTopMargin = Math.round(ds.margins.top / 2);
+  const page1BottomMargin = ds.margins.bottom;
+  const pageNBottomMargin = Math.round(ds.margins.bottom / 2);
+
+  // Use the smaller margins for the Page (applies to all pages)
+  // Then add a top spacer on the first page to make up the difference
+  const pageStyle = {
+    paddingTop: pageNTopMargin,
+    paddingBottom: pageNBottomMargin,
+    paddingLeft: ds.margins.left,
+    paddingRight: ds.margins.right,
+    fontFamily: resolvedFont,
+    fontSize: ds.baseFontSize,
+    lineHeight: ds.lineHeight,
+    color: BODY_COLOR,
+  };
+
+  // Extra space for page 1 only (difference between full and half margin)
+  const page1TopSpacer = (
+    <View style={{ height: page1TopMargin - pageNTopMargin }} />
+  );
+  const page1BottomExtra = page1BottomMargin - pageNBottomMargin;
+
   /* ─── SINGLE COLUMN ─── */
   if (!isTwoColumn) {
     return (
       <Document>
-        <Page
-          size="A4"
-          style={{
-            paddingTop: ds.margins.top,
-            paddingBottom: ds.margins.bottom,
-            paddingLeft: ds.margins.left,
-            paddingRight: ds.margins.right,
-            fontFamily: resolvedFont,
-            fontSize: ds.baseFontSize,
-            lineHeight: ds.lineHeight,
-            color: BODY_COLOR,
-          }}
-        >
-          <BlocksWithDividers
-            blockList={visibleBlocks}
-            rendererProps={rendererProps}
-            spacing={ds.sectionSpacing}
-            dividerStyle={dividerStyle}
-          />
+        <Page size="A4" style={pageStyle}>
+          {page1TopSpacer}
+          <View style={{ marginBottom: page1BottomExtra }}>
+            <BlocksWithDividers
+              blockList={visibleBlocks}
+              rendererProps={rendererProps}
+              spacing={ds.sectionSpacing}
+              dividerStyle={dividerStyle}
+            />
+          </View>
+          {pageNumber}
           {watermark}
         </Page>
       </Document>
@@ -644,19 +692,9 @@ export function PdfDocument({ blocks, templateStyles, designSettings, userPlan }
 
   return (
     <Document>
-      <Page
-        size="A4"
-        style={{
-          paddingTop: ds.margins.top,
-          paddingBottom: ds.margins.bottom,
-          paddingLeft: ds.margins.left,
-          paddingRight: ds.margins.right,
-          fontFamily: resolvedFont,
-          fontSize: ds.baseFontSize,
-          lineHeight: ds.lineHeight,
-          color: BODY_COLOR,
-        }}
-      >
+      <Page size="A4" style={pageStyle}>
+        {page1TopSpacer}
+
         {/* Full-width header */}
         {headerSpansFullWidth && headerBlock && (
           <View
@@ -666,8 +704,8 @@ export function PdfDocument({ blocks, templateStyles, designSettings, userPlan }
               paddingVertical: hasHeaderBg ? 10 : 0,
               marginBottom: ds.sectionSpacing,
               marginHorizontal: hasHeaderBg ? -ds.margins.left : 0,
-              marginTop: hasHeaderBg ? -ds.margins.top : 0,
-              paddingTop: hasHeaderBg ? ds.margins.top : 0,
+              marginTop: hasHeaderBg ? -(page1TopMargin) : 0,
+              paddingTop: hasHeaderBg ? page1TopMargin : 0,
               paddingLeft: hasHeaderBg ? ds.margins.left : 0,
               paddingRight: hasHeaderBg ? ds.margins.right : 0,
             }}
@@ -697,6 +735,7 @@ export function PdfDocument({ blocks, templateStyles, designSettings, userPlan }
           )}
         </View>
 
+        {pageNumber}
         {watermark}
       </Page>
     </Document>
