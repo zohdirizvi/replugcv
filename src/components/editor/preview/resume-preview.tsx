@@ -238,7 +238,7 @@ export function ResumePreview() {
     );
 
     return (
-      <div onClick={() => setSelectedBlockId(null)}>
+      <div>
         {/* Full-width header (if headerSpan is "full") */}
         {style.headerSpan !== "main" && headerBlock && (
           <div
@@ -290,7 +290,7 @@ export function ResumePreview() {
   }
 
   return (
-    <div onClick={() => setSelectedBlockId(null)} style={{ display: "flex", flexDirection: "column", gap: designSettings.sectionSpacing }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: designSettings.sectionSpacing }}>
       {visibleBlocks.map((block) => (
         <BlockWrapper key={block.id} block={block} {...wrapperProps} />
       ))}

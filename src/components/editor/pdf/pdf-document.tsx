@@ -60,7 +60,7 @@ function SectionHeading({
 
   if (style.headingStyle === "caps-spaced") {
     return (
-      <View style={{ marginBottom: 4, borderBottomWidth: 0.5, borderBottomColor: "#E5E7EB", paddingBottom: 3 }}>
+      <View style={{ marginBottom: 8, borderBottomWidth: 0.5, borderBottomColor: "#E5E7EB", paddingBottom: 3 }}>
         <Text style={{ fontSize: scaledSize(baseFontSize, 0.75), fontFamily: headingFont, fontWeight: 500, textTransform: "uppercase", letterSpacing: 2, color: accentColor }}>
           {title}
         </Text>
@@ -70,7 +70,7 @@ function SectionHeading({
 
   if (style.headingStyle === "colored-bg") {
     return (
-      <View style={{ marginBottom: 4, backgroundColor: accentColor, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 2 }}>
+      <View style={{ marginBottom: 8, backgroundColor: accentColor, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 2 }}>
         <Text style={{ fontSize: scaledSize(baseFontSize, 0.75), fontFamily: headingFont, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, color: "#FFFFFF" }}>
           {title}
         </Text>
@@ -80,7 +80,7 @@ function SectionHeading({
 
   if (style.headingStyle === "bordered-left") {
     return (
-      <View style={{ marginBottom: 4, flexDirection: "row", alignItems: "center", gap: 6 }}>
+      <View style={{ marginBottom: 8, flexDirection: "row", alignItems: "center", gap: 6 }}>
         <View style={{ width: 3, height: 14, backgroundColor: accentColor, borderRadius: 2 }} />
         <Text style={{ fontSize: scaledSize(baseFontSize, 0.85), fontFamily: headingFont, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, color: accentColor }}>
           {title}
@@ -91,7 +91,7 @@ function SectionHeading({
 
   if (style.headingStyle === "bold") {
     return (
-      <View style={{ marginBottom: 4 }}>
+      <View style={{ marginBottom: 8 }}>
         <Text style={{ fontSize: scaledSize(baseFontSize, 0.85), fontFamily: headingFont, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: accentColor }}>
           {title}
         </Text>
@@ -101,7 +101,7 @@ function SectionHeading({
 
   /* Default: underline — simple semibold accent text (matches Figma) */
   return (
-    <View style={{ marginBottom: 4 }}>
+    <View style={{ marginBottom: 8 }}>
       <Text style={{ fontSize: scaledSize(baseFontSize, 1.15), fontFamily: headingFont, fontWeight: 600, color: accentColor }}>
         {title}
       </Text>

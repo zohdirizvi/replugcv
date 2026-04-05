@@ -164,6 +164,7 @@ export function EditorProvider({
               .then()
           );
         }
+        promises.push(supabase.from("resumes").update({ updated_at: new Date().toISOString() }).eq("id", resumeId).then());
         await Promise.all(promises);
         setSaveStatus("saved");
         setTimeout(() => setSaveStatus((s) => (s === "saved" ? "idle" : s)), 2000);
@@ -171,7 +172,7 @@ export function EditorProvider({
         setSaveStatus("error");
       }
     }, 400);
-  }, []);
+  }, [resumeId]);
 
   const redo = useCallback(() => {
     const stack = redoStackRef.current;
@@ -207,6 +208,7 @@ export function EditorProvider({
               .then()
           );
         }
+        promises.push(supabase.from("resumes").update({ updated_at: new Date().toISOString() }).eq("id", resumeId).then());
         await Promise.all(promises);
         setSaveStatus("saved");
         setTimeout(() => setSaveStatus((s) => (s === "saved" ? "idle" : s)), 2000);
@@ -214,7 +216,7 @@ export function EditorProvider({
         setSaveStatus("error");
       }
     }, 400);
-  }, []);
+  }, [resumeId]);
 
   /* --- Keyboard shortcuts for undo/redo --- */
   useEffect(() => {
@@ -301,15 +303,16 @@ export function EditorProvider({
                 .then()
             );
           }
-          if (updatedResume) {
-            promises.push(
-              supabase
-                .from("resumes")
-                .update({ title: updatedResume.title })
-                .eq("id", updatedResume.id)
-                .then()
-            );
-          }
+          // Always touch resumes.updated_at so dashboard shows correct timestamp
+          const resumeUpdate: Record<string, unknown> = { updated_at: new Date().toISOString() };
+          if (updatedResume) resumeUpdate.title = updatedResume.title;
+          promises.push(
+            supabase
+              .from("resumes")
+              .update(resumeUpdate)
+              .eq("id", resumeId)
+              .then()
+          );
           await Promise.all(promises);
           setSaveStatus("saved");
           setTimeout(() => setSaveStatus((s) => (s === "saved" ? "idle" : s)), 2000);

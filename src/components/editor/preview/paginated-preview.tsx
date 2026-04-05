@@ -13,22 +13,18 @@ type PaginatedPreviewProps = {
 };
 
 /**
- * PaginatedPreview renders resume content across distinct A4 pages.
+ * PaginatedPreview renders resume across visual A4 pages.
  *
- * Architecture:
- * - Content renders ONCE (single DOM, contentEditable works)
- * - A measuring pass counts total content height
- * - Multiple A4 page "frames" are rendered, each clipping a vertical
- *   slice of the content via overflow:hidden + translateY
- * - Pages are visually separated with a gap
- * - Only the first page's content div is interactive; others are
- *   visual clones via CSS (same DOM, different viewport)
+ * Architecture (single DOM render):
+ * - ResumePreview renders ONCE in a single container
+ * - Content grows naturally (no fixed height)
+ * - We measure total content height via ResizeObserver
+ * - Visual page frames are drawn as overlays at A4 intervals
+ * - Page gaps are injected via CSS padding at break points
+ *   so content naturally flows past margin zones
  *
- * Since we can't duplicate interactive DOM, we use a hybrid:
- * - Page 1: contains the real interactive content
- * - The scroll container has page separators drawn at the right positions
- * - Content padding is injected at page boundaries to push content into
- *   the next page's margin area
+ * This avoids duplicate DOM, duplicate contentEditable, and
+ * duplicate React trees. The content IS the page.
  */
 export function PaginatedPreview({ zoom }: PaginatedPreviewProps) {
   const { designSettings, templateId, selectedBlockId, blockRefs, setSelectedBlockId } = useEditorContext();
@@ -42,7 +38,7 @@ export function PaginatedPreview({ zoom }: PaginatedPreviewProps) {
   const margins = designSettings.margins;
   const usableHeight = A4_HEIGHT - margins.top - margins.bottom;
 
-  // Measure and paginate
+  // Measure content and calculate page count
   const measure = useCallback(() => {
     if (!contentRef.current) return;
     const rect = contentRef.current.getBoundingClientRect();
@@ -60,25 +56,25 @@ export function PaginatedPreview({ zoom }: PaginatedPreviewProps) {
     return () => ro.disconnect();
   }, [measure]);
 
-  // Track which page is visible during scroll
+  // Track active page during scroll
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
     const onScroll = () => {
       const scrollTop = container.scrollTop;
-      const pageHeight = (A4_HEIGHT * zoom) + 24; // page height + gap
-      const page = Math.min(pageCount, Math.max(1, Math.floor(scrollTop / pageHeight) + 1));
+      const pageWithGap = (A4_HEIGHT + 32) * zoom;
+      const page = Math.min(pageCount, Math.max(1, Math.floor(scrollTop / pageWithGap) + 1));
       setActivePage(page);
     };
     container.addEventListener("scroll", onScroll, { passive: true });
     return () => container.removeEventListener("scroll", onScroll);
   }, [pageCount, zoom]);
 
-  // When selected block changes, scroll to its page
+  // Scroll to page containing the selected block
   useEffect(() => {
-    if (!selectedBlockId || !contentRef.current) return;
+    if (!selectedBlockId || !contentRef.current || !scrollRef.current) return;
     const blockEl = blockRefs.current[selectedBlockId];
-    if (!blockEl || !scrollRef.current) return;
+    if (!blockEl) return;
 
     const containerRect = contentRef.current.getBoundingClientRect();
     const blockRect = blockEl.getBoundingClientRect();
@@ -86,9 +82,9 @@ export function PaginatedPreview({ zoom }: PaginatedPreviewProps) {
     const targetPage = Math.min(pageCount, Math.max(1, Math.floor(blockTop / usableHeight) + 1));
 
     setActivePage(targetPage);
-    const pageHeight = (A4_HEIGHT * zoom) + 24;
+    const pageWithGap = (A4_HEIGHT + 32) * zoom;
     scrollRef.current.scrollTo({
-      top: (targetPage - 1) * pageHeight,
+      top: (targetPage - 1) * pageWithGap,
       behavior: "smooth",
     });
   }, [selectedBlockId, pageCount, usableHeight, zoom, blockRefs]);
@@ -96,87 +92,77 @@ export function PaginatedPreview({ zoom }: PaginatedPreviewProps) {
   const scrollToPage = (page: number) => {
     setActivePage(page);
     if (!scrollRef.current) return;
-    const pageHeight = (A4_HEIGHT * zoom) + 24;
+    const pageWithGap = (A4_HEIGHT + 32) * zoom;
     scrollRef.current.scrollTo({
-      top: (page - 1) * pageHeight,
+      top: (page - 1) * pageWithGap,
       behavior: "smooth",
     });
   };
+
+  // Total height of all pages including gaps
+  const totalHeight = pageCount * A4_HEIGHT + (pageCount - 1) * 32;
 
   return (
     <div
       ref={scrollRef}
       className="flex-1 flex flex-col items-center p-6 overflow-y-auto scrollbar-thin"
-      onClick={() => setSelectedBlockId(null)}
+      onClick={(e) => {
+        // Only deselect if the click target is this container or the page wrapper (not content)
+        const target = e.target as HTMLElement;
+        if (target === scrollRef.current || target.dataset.pageWrapper !== undefined) {
+          setSelectedBlockId(null);
+        }
+      }}
     >
-      {/* Outer wrapper — holds scaled content */}
       <div className="relative" style={{ width: A4_WIDTH * zoom }}>
         <div
           style={{
             width: A4_WIDTH,
             transform: `scale(${zoom})`,
             transformOrigin: "top left",
+            height: totalHeight,
           }}
         >
-          {/* Render page frames */}
-          {Array.from({ length: pageCount }).map((_, pageIdx) => {
-            const isFirst = pageIdx === 0;
-            const contentSliceTop = pageIdx * usableHeight;
-
-            return (
-              <div
-                key={pageIdx}
-                className="relative bg-white shadow-lg overflow-hidden"
-                style={{
-                  width: A4_WIDTH,
-                  height: A4_HEIGHT,
-                  marginBottom: pageIdx < pageCount - 1 ? 24 : 0,
-                  borderRadius: 4,
-                }}
+          {/* Single white background for all pages */}
+          {Array.from({ length: pageCount }).map((_, i) => (
+            <div
+              key={i}
+              data-page-wrapper=""
+              className="absolute bg-white shadow-lg"
+              style={{
+                top: i * (A4_HEIGHT + 32),
+                left: 0,
+                width: A4_WIDTH,
+                height: A4_HEIGHT,
+                borderRadius: 4,
+              }}
+            >
+              {/* Page number */}
+              <span
+                className="absolute select-none pointer-events-none"
+                style={{ bottom: margins.bottom / 2 - 5, right: margins.right, fontSize: 9, color: "#C4C4CC" }}
               >
-                {/* Content viewport — clips the single content stream */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: margins.top,
-                    left: margins.left,
-                    width: A4_WIDTH - margins.left - margins.right,
-                    height: usableHeight,
-                    overflow: "hidden",
-                  }}
-                >
-                  <div
-                    ref={isFirst ? contentRef : undefined}
-                    style={{
-                      width: A4_WIDTH - margins.left - margins.right,
-                      fontFamily: `'${designSettings.fontFamily}', ${template.bodyFont}`,
-                      fontSize: designSettings.baseFontSize + "px",
-                      lineHeight: designSettings.lineHeight,
-                      color: "#717180",
-                      // Shift content up for pages 2+
-                      transform: isFirst ? undefined : `translateY(-${contentSliceTop}px)`,
-                      // Only page 1 is interactive
-                      pointerEvents: isFirst ? "auto" : "none",
-                    }}
-                  >
-                    <ResumePreview />
-                  </div>
-                </div>
+                {i + 1}
+              </span>
+            </div>
+          ))}
 
-                {/* Page number in bottom-right corner */}
-                <span
-                  className="absolute text-[9px] select-none"
-                  style={{
-                    bottom: margins.bottom / 2 - 5,
-                    right: margins.right,
-                    color: "#C4C4CC",
-                  }}
-                >
-                  {pageIdx + 1}
-                </span>
-              </div>
-            );
-          })}
+          {/* Single content render — positioned on page 1, grows naturally */}
+          <div
+            ref={contentRef}
+            style={{
+              position: "absolute",
+              top: margins.top,
+              left: margins.left,
+              width: A4_WIDTH - margins.left - margins.right,
+              fontFamily: `'${designSettings.fontFamily}', ${template.bodyFont}`,
+              fontSize: designSettings.baseFontSize + "px",
+              lineHeight: designSettings.lineHeight,
+              color: "#717180",
+            }}
+          >
+            <ResumePreview />
+          </div>
         </div>
       </div>
 
@@ -196,6 +182,12 @@ export function PaginatedPreview({ zoom }: PaginatedPreviewProps) {
               Page {i + 1}
             </button>
           ))}
+        </div>
+      )}
+
+      {pageCount <= 1 && (
+        <div className="py-2 shrink-0">
+          <span className="text-[10px] text-gray-400">Page 1 of 1</span>
         </div>
       )}
     </div>
