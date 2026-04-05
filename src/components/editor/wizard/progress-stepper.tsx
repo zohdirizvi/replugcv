@@ -17,26 +17,48 @@ export function ProgressStepper() {
         const isClickable = completed || isCurrent || step.id <= currentStep;
         const isLast = idx === WIZARD_STEPS.length - 1;
 
+        // Determine circle styles
+        let circleBg: string;
+        let circleBorder: string;
+        if (isCurrent) {
+          circleBg = "#16A34A";
+          circleBorder = "#16A34A";
+        } else if (completed) {
+          circleBg = "#0A0A0A";
+          circleBorder = "#404040";
+        } else {
+          circleBg = "#0A0A0A";
+          circleBorder = "#262626";
+        }
+
+        // Connector line: green only between current and previous completed
+        const nextStep = WIZARD_STEPS[idx + 1];
+        const connectorSolid = completed && nextStep && (nextStep.id === currentStep || isStepCompleted(nextStep.id as StepId));
+
         return (
           <div key={step.id} className="flex gap-3">
             {/* Left column: circle + connector */}
             <div className="flex flex-col items-center">
-              {/* Circle */}
               <button
                 onClick={() => isClickable && setCurrentStep(step.id as StepId)}
                 disabled={!isClickable}
                 className="relative flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors"
                 style={{
-                  backgroundColor: completed ? "#16A34A" : "#0A0A0A",
-                  borderColor: completed ? "#16A34A" : isCurrent ? "#262626" : "transparent",
-                  opacity: isFuture ? 0.6 : 1,
+                  backgroundColor: circleBg,
+                  borderColor: circleBorder,
+                  opacity: isFuture ? 0.5 : 1,
                   cursor: isClickable ? "pointer" : "default",
                 }}
               >
-                {completed ? (
-                  <Check className="size-4 text-white" />
-                ) : (
+                {isCurrent ? (
+                  /* Current step: green circle with step number */
                   <span className="text-xs font-semibold text-white">{step.id}</span>
+                ) : completed ? (
+                  /* Completed: subtle neutral check */
+                  <Check className="size-4" style={{ color: "#737373" }} />
+                ) : (
+                  /* Future: neutral number */
+                  <span className="text-xs font-semibold" style={{ color: "#737373" }}>{step.id}</span>
                 )}
               </button>
 
@@ -45,14 +67,9 @@ export function ProgressStepper() {
                 <div
                   className="w-0.5 flex-1 min-h-[24px]"
                   style={{
-                    backgroundColor: completed && isStepCompleted(WIZARD_STEPS[idx + 1]?.id as StepId)
-                      ? "#16A34A"
-                      : completed
-                      ? "#16A34A"
-                      : "transparent",
-                    borderLeft: completed
-                      ? "2px solid #16A34A"
-                      : "2px dashed #404040",
+                    borderLeft: connectorSolid
+                      ? "2px solid #404040"
+                      : "2px dashed #333",
                   }}
                 />
               )}
@@ -61,7 +78,7 @@ export function ProgressStepper() {
             {/* Right column: text */}
             <div
               className="pb-6"
-              style={{ opacity: isFuture ? 0.6 : 1 }}
+              style={{ opacity: isFuture ? 0.5 : 1 }}
             >
               <button
                 onClick={() => isClickable && setCurrentStep(step.id as StepId)}
@@ -70,14 +87,14 @@ export function ProgressStepper() {
                 style={{ cursor: isClickable ? "pointer" : "default" }}
               >
                 <p
-                  className="text-sm font-medium leading-tight"
-                  style={{ color: isCurrent ? "#FFFFFF" : "#D4D4D4" }}
+                  className="text-sm font-semibold leading-tight"
+                  style={{ color: isCurrent ? "#D4D4D4" : "#A3A3A3" }}
                 >
                   {step.label}
                 </p>
                 <p
                   className="text-xs mt-0.5 leading-snug"
-                  style={{ color: "#737373" }}
+                  style={{ color: isCurrent ? "#A3A3A3" : "#737373" }}
                 >
                   {step.description}
                 </p>

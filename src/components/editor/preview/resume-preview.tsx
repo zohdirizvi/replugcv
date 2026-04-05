@@ -30,7 +30,7 @@ function BlockWrapper({
   style: TemplateStyles;
   accentColor: string;
   selectedBlockId: string | null;
-  onSelect: (id: string) => void;
+  onSelect: (id: string | null) => void;
   onNavigateToStep: (step: number) => void;
   onAddEntry: (block: ResumeBlock) => void;
   onDelete: (id: string) => void;
@@ -60,7 +60,13 @@ function BlockWrapper({
     <div
       ref={(el) => { blockRefs.current[block.id] = el; }}
       onClick={(e) => {
+        e.stopPropagation();
         const target = e.target as HTMLElement;
+        // Toggle: clicking the already-selected section deselects it
+        if (isSelected) {
+          onSelect(null);
+          return;
+        }
         onSelect(block.id);
         const step = stepMap[block.type];
         if (step) onNavigateToStep(step);
@@ -225,7 +231,7 @@ export function ResumePreview() {
     );
 
     return (
-      <div>
+      <div onClick={() => setSelectedBlockId(null)}>
         {/* Full-width header (if headerSpan is "full") */}
         {style.headerSpan !== "main" && headerBlock && (
           <div
@@ -277,7 +283,7 @@ export function ResumePreview() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: designSettings.sectionSpacing }}>
+    <div onClick={() => setSelectedBlockId(null)} style={{ display: "flex", flexDirection: "column", gap: designSettings.sectionSpacing }}>
       {visibleBlocks.map((block) => (
         <BlockWrapper key={block.id} block={block} {...wrapperProps} />
       ))}
