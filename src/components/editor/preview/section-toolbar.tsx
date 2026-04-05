@@ -23,7 +23,7 @@ export function SectionToolbar({
 }: SectionToolbarProps) {
   return (
     <div
-      className="absolute -top-9 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-lg bg-white px-2 py-1 shadow-lg border border-gray-200"
+      className="absolute -top-7 right-0 z-20 flex items-center gap-0.5 rounded-md bg-white px-1.5 py-0.5 shadow-md border border-gray-200"
       onClick={(e) => e.stopPropagation()}
     >
       {canMoveUp && onMoveUp && (

@@ -287,7 +287,7 @@ export function BlockPreview({
 
     if (items.length === 0) {
       return (
-        <div className="relative pb-6">
+        <div className="relative">
           <SectionHeading title="Experience" style={style} accentColor={accentColor} />
           {[0, 1].map((i) => (
             <div key={i} className="mb-3 last:mb-0">
@@ -310,7 +310,7 @@ export function BlockPreview({
     }
 
     return (
-      <div className="relative pb-6">
+      <div className="relative">
         <SectionHeading title="Experience" style={style} accentColor={accentColor} />
         {items.map((item, i) => (
           <div key={i} className="mb-3 last:mb-0 relative group/entry">
@@ -430,7 +430,7 @@ export function BlockPreview({
 
     if (items.length === 0) {
       return (
-        <div className="relative pb-6">
+        <div className="relative">
           <SectionHeading title="Education" style={style} accentColor={accentColor} />
           {[0].map((i) => (
             <div key={i} className="mb-3 last:mb-0">
@@ -450,7 +450,7 @@ export function BlockPreview({
     }
 
     return (
-      <div className="relative pb-6">
+      <div className="relative">
         <SectionHeading title="Education" style={style} accentColor={accentColor} />
         {items.map((item, i) => (
           <div key={i} className="mb-3 last:mb-0 relative group/entry">
@@ -529,7 +529,7 @@ export function BlockPreview({
 
     if (items.length === 0) {
       return (
-        <div className="relative pb-6">
+        <div className="relative">
           <SectionHeading title={block.title} style={style} accentColor={accentColor} />
           <p className="font-semibold italic" style={{ fontSize: "1em", color: "#C4C4CC" }}>
             Your Skill, Another Skill, One More Skill
@@ -623,7 +623,7 @@ export function BlockPreview({
     };
 
     return (
-      <div className="relative pb-6">
+      <div className="relative">
         <SectionHeading title={block.title} style={style} accentColor={accentColor} />
         {renderSkills()}
         <AddEntryButton onClick={handleAddSkill} label={`Add ${block.title.toLowerCase().replace(/s$/, "")}`} />
@@ -643,7 +643,7 @@ export function BlockPreview({
 
     if (items.length === 0) {
       return (
-        <div className="relative pb-6">
+        <div className="relative">
           <SectionHeading title="Projects" style={style} accentColor={accentColor} />
           <PlaceholderBlock label="Projects" hint="Add your projects" />
           <AddEntryButton onClick={handleAddEntry} label="Add project" />
@@ -653,7 +653,7 @@ export function BlockPreview({
     }
 
     return (
-      <div className="relative pb-6">
+      <div className="relative">
         <SectionHeading title="Projects" style={style} accentColor={accentColor} />
         {items.map((item, i) => (
           <div key={i} className="mb-2 last:mb-0 relative group/entry">
@@ -684,7 +684,7 @@ export function BlockPreview({
 
     if (items.length === 0) {
       return (
-        <div className="relative pb-6">
+        <div className="relative">
           <SectionHeading title={block.title} style={style} accentColor={accentColor} />
           <PlaceholderBlock label={block.title} hint={`Add your ${block.title.toLowerCase()}`} />
           <AddEntryButton onClick={handleAddEntry} label={`Add ${block.title.toLowerCase()}`} />
@@ -694,7 +694,7 @@ export function BlockPreview({
     }
 
     return (
-      <div className="relative pb-6">
+      <div className="relative">
         <SectionHeading title={block.title} style={style} accentColor={accentColor} />
         {items.map((item, i) => (
           <div key={i} className="mb-2 last:mb-0 relative group/entry">

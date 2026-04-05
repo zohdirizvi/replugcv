@@ -1,6 +1,5 @@
 "use client";
 
-import { cx } from "@/utils/cx";
 import { useEditorContext } from "../editor-context";
 import { TEMPLATES } from "../constants";
 import type { ResumeBlock, TemplateStyles } from "../types";
@@ -79,14 +78,16 @@ function BlockWrapper({
         if (step) onNavigateToStep(step);
         if (!target.isContentEditable) scrollToBlock(block.id);
       }}
-      className={cx(
-        "relative cursor-pointer transition-all group/section",
-        isSelected
-          ? "border-l-2 border border-[#065f46] rounded-[4px] px-3 pt-1 pb-8 mb-4"
-          : ""
-      )}
+      className="relative cursor-pointer transition-all group/section"
       style={{
         opacity: selectedBlockId && !isSelected ? 0.4 : 1,
+        // Selection indicator uses box-shadow + outline so it doesn't
+        // add any size or push content outside page margins
+        ...(isSelected ? {
+          outline: "1px solid #065f46",
+          boxShadow: "inset 3px 0 0 0 #065f46",
+          borderRadius: 4,
+        } : {}),
       }}
     >
       {isSelected && (
