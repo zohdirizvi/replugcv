@@ -154,6 +154,15 @@ function HeaderBlock({ block, accentColor, baseFontSize, resolvedFont, style }: 
 
 /* ── CONTACT ── */
 
+// Unicode symbols for contact fields (PDF can't render SVG icons)
+const CONTACT_SYMBOLS: Record<string, string> = {
+  email: "\u2709",    // ✉ envelope
+  phone: "\u260E",    // ☎ telephone
+  location: "\u25CB", // ○ circle (pin-like)
+  website: "\u25C8",  // ◈ diamond
+  linkedin: "\u29BE", // ⦾ circled ring
+};
+
 function ContactBlock({ block, style, accentColor, baseFontSize, resolvedFont }: BlockRendererProps) {
   const c = block.content as Record<string, unknown>;
   const fields = CONTACT_FIELDS_LIST.filter((f) => !!(c[f.key] as string));
@@ -174,7 +183,7 @@ function ContactBlock({ block, style, accentColor, baseFontSize, resolvedFont }:
       >
         {fields.map((f) => (
           <Text key={f.key} style={{ fontSize: scaledSize(baseFontSize, 1), fontFamily: resolvedFont, fontWeight: 500, color: BODY_COLOR }}>
-            <Text style={{ color: accentColor }}>{"\u2022 "}</Text>
+            <Text style={{ color: accentColor, fontSize: scaledSize(baseFontSize, 0.9) }}>{CONTACT_SYMBOLS[f.key] || "\u2022"} </Text>
             {c[f.key] as string}
           </Text>
         ))}
