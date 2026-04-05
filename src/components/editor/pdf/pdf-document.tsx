@@ -480,6 +480,36 @@ function PdfBlock({ block, rendererProps }: { block: ResumeBlock; rendererProps:
   }
 }
 
+/* ── Render blocks with dividers ── */
+
+function BlocksWithDividers({
+  blockList,
+  rendererProps,
+  spacing,
+  dividerStyle,
+}: {
+  blockList: ResumeBlock[];
+  rendererProps: Omit<BlockRendererProps, "block">;
+  spacing: number;
+  dividerStyle: string;
+}) {
+  return (
+    <>
+      {blockList.map((block, idx) => (
+        <View key={block.id}>
+          <PdfBlock block={block} rendererProps={rendererProps} />
+          {idx < blockList.length - 1 && dividerStyle !== "none" && (
+            <SectionDivider spacing={spacing} />
+          )}
+          {idx < blockList.length - 1 && dividerStyle === "none" && (
+            <View style={{ height: spacing }} />
+          )}
+        </View>
+      ))}
+    </>
+  );
+}
+
 /* ── Main Document ── */
 
 type PdfDocumentProps = {
@@ -491,11 +521,12 @@ type PdfDocumentProps = {
 
 export function PdfDocument({ blocks, templateStyles, designSettings, userPlan }: PdfDocumentProps) {
   const ds = designSettings || DEFAULT_DESIGN_SETTINGS;
+  const ts = templateStyles;
   const resolvedFont = pdfFontFamily(ds.fontFamily);
-  const accentColor = ds.accentColor || templateStyles.accentColor;
+  const accentColor = ds.accentColor || ts.accentColor;
 
   const rendererProps: Omit<BlockRendererProps, "block"> = {
-    style: templateStyles,
+    style: ts,
     accentColor,
     baseFontSize: ds.baseFontSize,
     lineHeight: ds.lineHeight,
@@ -507,6 +538,109 @@ export function PdfDocument({ blocks, templateStyles, designSettings, userPlan }
     .filter((b) => b.is_visible !== false)
     .filter((b) => hasContent(b))
     .sort((a, b) => a.sort_order - b.sort_order);
+
+  const dividerStyle = ts.dividerStyle || "line";
+  const isTwoColumn = ts.layout === "two-column";
+
+  /* ─── Watermark (shared) ─── */
+  const watermark = userPlan === "free" ? (
+    <Text
+      style={{ position: "absolute", bottom: 16, right: 20, fontSize: 8, color: "#9CA3AF", opacity: 0.5 }}
+      fixed
+    >
+      Built with ReplugCV
+    </Text>
+  ) : null;
+
+  /* ─── SINGLE COLUMN ─── */
+  if (!isTwoColumn) {
+    return (
+      <Document>
+        <Page
+          size="A4"
+          style={{
+            paddingTop: ds.margins.top,
+            paddingBottom: ds.margins.bottom,
+            paddingLeft: ds.margins.left,
+            paddingRight: ds.margins.right,
+            fontFamily: resolvedFont,
+            fontSize: ds.baseFontSize,
+            lineHeight: ds.lineHeight,
+            color: BODY_COLOR,
+          }}
+        >
+          <BlocksWithDividers
+            blockList={visibleBlocks}
+            rendererProps={rendererProps}
+            spacing={ds.sectionSpacing}
+            dividerStyle={dividerStyle}
+          />
+          {watermark}
+        </Page>
+      </Document>
+    );
+  }
+
+  /* ─── TWO COLUMN ─── */
+  const sidebarTypes = ts.sidebarBlocks || [];
+  const headerBlock = visibleBlocks.find((b) => b.type === "header");
+  const nonHeaderBlocks = visibleBlocks.filter((b) => b.type !== "header");
+  const sidebarBlocks = nonHeaderBlocks.filter((b) => sidebarTypes.includes(b.type));
+  const mainBlocks = nonHeaderBlocks.filter((b) => !sidebarTypes.includes(b.type));
+
+  const sidebarPct = ts.sidebarWidth || 35;
+  const isLeftSidebar = ts.sidebarPosition !== "right";
+  const sidebarBg = ts.sidebarBgColor || undefined;
+  const hasHeaderBg = !!ts.headerBgColor;
+  const headerSpansFullWidth = ts.headerSpan !== "main";
+
+  // Sidebar-specific renderer props (may have different text color)
+  const sidebarRendererProps: Omit<BlockRendererProps, "block"> = {
+    ...rendererProps,
+    // Override accent for dark sidebars if sidebar text is white
+    ...(ts.sidebarTextColor ? {} : {}),
+  };
+
+  const sidebarColumn = (
+    <View
+      style={{
+        width: `${sidebarPct}%`,
+        backgroundColor: sidebarBg,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+      }}
+    >
+      <BlocksWithDividers
+        blockList={sidebarBlocks}
+        rendererProps={sidebarRendererProps}
+        spacing={ds.sectionSpacing}
+        dividerStyle={dividerStyle}
+      />
+    </View>
+  );
+
+  const mainColumn = (
+    <View
+      style={{
+        width: `${100 - sidebarPct}%`,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+      }}
+    >
+      {/* If header lives in main area only */}
+      {!headerSpansFullWidth && headerBlock && (
+        <View style={{ marginBottom: ds.sectionSpacing }}>
+          <PdfBlock block={headerBlock} rendererProps={rendererProps} />
+        </View>
+      )}
+      <BlocksWithDividers
+        blockList={mainBlocks}
+        rendererProps={rendererProps}
+        spacing={ds.sectionSpacing}
+        dividerStyle={dividerStyle}
+      />
+    </View>
+  );
 
   return (
     <Document>
@@ -523,24 +657,47 @@ export function PdfDocument({ blocks, templateStyles, designSettings, userPlan }
           color: BODY_COLOR,
         }}
       >
-        {visibleBlocks.map((block, idx) => (
-          <View key={block.id}>
-            <PdfBlock block={block} rendererProps={rendererProps} />
-            {/* Section divider after each block except last */}
-            {idx < visibleBlocks.length - 1 && (
-              <SectionDivider spacing={ds.sectionSpacing} />
-            )}
-          </View>
-        ))}
-
-        {userPlan === "free" && (
-          <Text
-            style={{ position: "absolute", bottom: 16, right: 20, fontSize: 8, color: "#9CA3AF", opacity: 0.5 }}
-            fixed
+        {/* Full-width header */}
+        {headerSpansFullWidth && headerBlock && (
+          <View
+            style={{
+              backgroundColor: hasHeaderBg ? ts.headerBgColor : undefined,
+              paddingHorizontal: hasHeaderBg ? 12 : 0,
+              paddingVertical: hasHeaderBg ? 10 : 0,
+              marginBottom: ds.sectionSpacing,
+              marginHorizontal: hasHeaderBg ? -ds.margins.left : 0,
+              marginTop: hasHeaderBg ? -ds.margins.top : 0,
+              paddingTop: hasHeaderBg ? ds.margins.top : 0,
+              paddingLeft: hasHeaderBg ? ds.margins.left : 0,
+              paddingRight: hasHeaderBg ? ds.margins.right : 0,
+            }}
           >
-            Built with ReplugCV
-          </Text>
+            <PdfBlock
+              block={headerBlock}
+              rendererProps={{
+                ...rendererProps,
+                accentColor: ts.headerTextColor || accentColor,
+              }}
+            />
+          </View>
         )}
+
+        {/* Two-column body */}
+        <View style={{ flexDirection: "row", flex: 1 }}>
+          {isLeftSidebar ? (
+            <>
+              {sidebarColumn}
+              {mainColumn}
+            </>
+          ) : (
+            <>
+              {mainColumn}
+              {sidebarColumn}
+            </>
+          )}
+        </View>
+
+        {watermark}
       </Page>
     </Document>
   );
