@@ -339,10 +339,13 @@ export default function DashboardPage() {
     window.location.href = `/editor/${data.id}`;
   }
 
-  async function deleteResume(id: string, title: string) {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    await supabase.from("resumes").delete().eq("id", id);
-    setResumes((prev) => prev.filter((r) => r.id !== id));
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    await supabase.from("resumes").delete().eq("id", deleteTarget.id);
+    setResumes((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+    setDeleteTarget(null);
   }
 
   async function duplicateResume(resume: ResumeWithBlocks) {
@@ -619,7 +622,7 @@ export default function DashboardPage() {
                         </button>
                         <div className="my-1 border-t border-secondary" />
                         <button
-                          onClick={() => { setMenuOpen(null); deleteResume(r.id, r.title); }}
+                          onClick={() => { setMenuOpen(null); setDeleteTarget({ id: r.id, title: r.title }); }}
                           className="flex w-full items-center gap-2 px-3 py-2 text-sm text-error-primary hover:bg-secondary transition cursor-pointer border-none bg-transparent text-left"
                         >
                           <Trash01 className="size-3.5" /> Delete
@@ -678,7 +681,7 @@ export default function DashboardPage() {
                       </button>
                       <div className="my-1 border-t border-secondary" />
                       <button
-                        onClick={() => { setMenuOpen(null); deleteResume(r.id, r.title); }}
+                        onClick={() => { setMenuOpen(null); setDeleteTarget({ id: r.id, title: r.title }); }}
                         className="flex w-full items-center gap-2 px-3 py-2 text-sm text-error-primary hover:bg-secondary transition cursor-pointer border-none bg-transparent text-left"
                       >
                         <Trash01 className="size-3.5" /> Delete
@@ -689,6 +692,34 @@ export default function DashboardPage() {
               </div>
             )
           )}
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setDeleteTarget(null)}>
+          <div className="bg-primary rounded-xl border border-secondary shadow-xl p-6 w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-semibold text-primary mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
+              Delete resume?
+            </h3>
+            <p className="text-sm text-tertiary mb-5">
+              &ldquo;{deleteTarget.title}&rdquo; will be permanently deleted. This cannot be undone.
+            </p>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 rounded-lg border border-secondary bg-primary text-sm font-medium text-primary cursor-pointer hover:bg-secondary transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 rounded-lg border-none bg-red-600 text-sm font-medium text-white cursor-pointer hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>
