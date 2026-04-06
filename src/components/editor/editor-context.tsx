@@ -268,10 +268,9 @@ export function EditorProvider({
     }
     if (b) {
       setBlocks(b);
-      if (b.length > 0) {
-        setSelectedBlockId(b[0].id);
-        setExpandedBlockId(b[0].id);
-      }
+      // Don't auto-select any block — page should load clean like Enhancv
+      setSelectedBlockId(null);
+      setExpandedBlockId(null);
     }
     // Fetch user plan from profiles
     const { data: { user } } = await supabase.auth.getUser();

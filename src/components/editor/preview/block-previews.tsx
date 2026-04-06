@@ -3,7 +3,6 @@
 import type { ResumeBlock, TemplateStyles } from "../types";
 import { CONTACT_FIELDS } from "../constants";
 import { EditableText } from "./editable-text";
-import { AddEntryButton } from "./add-entry-button";
 
 /* ---- Body text color (consistent across resume) ---- */
 const BODY_COLOR = "#717180";
@@ -74,12 +73,12 @@ function SectionHeading({
     );
   }
 
-  /* Default: underline — simple semibold in accent color (per Figma) */
+  /* Default: uppercase with thin underline rule (Enhancv style) */
   return (
-    <div className="mb-2">
+    <div className="mb-3 pb-1" style={{ borderBottom: "1px solid #E5E7EB" }}>
       <h2
-        className="font-semibold"
-        style={{ color, fontFamily: style.headingFont, fontSize: "1.15em" }}
+        className="font-semibold uppercase tracking-wide"
+        style={{ color, fontFamily: style.headingFont, fontSize: "0.85em", letterSpacing: "0.08em" }}
       >
         {title}
       </h2>
@@ -106,17 +105,8 @@ function PlaceholderBlock({ label, hint }: { label: string; hint: string }) {
 
 /* ---- Drag handle ---- */
 
-function DragHandle() {
-  return (
-    <span
-      className="absolute right-1 top-1 text-gray-300 hover:text-gray-500 cursor-grab leading-none select-none"
-      style={{ fontSize: "0.85em" }}
-      title="Drag to reorder"
-    >
-      &#x2807;&#x2807;
-    </span>
-  );
-}
+/* DragHandle removed — reordering via floating toolbar arrows */
+function DragHandle() { return null; }
 
 /* ---- Main block preview ---- */
 
@@ -153,34 +143,30 @@ export function BlockPreview({
               src={headerImage}
               alt="Profile"
               className="object-cover"
-              style={{
-                width: 60,
-                height: 60,
-                borderRadius: headerImageShape === "circle" ? "50%" : 6,
-              }}
+              style={{ width: 60, height: 60, borderRadius: headerImageShape === "circle" ? "50%" : 6 }}
             />
           </div>
         )}
         <div>
           <EditableText
             value={name}
-            placeholder="Your Name"
+            placeholder="YOUR NAME"
             onSave={(v) => onUpdateField?.("name", v)}
             tag="p"
-            className="font-semibold leading-tight"
-            placeholderClassName="not-italic text-gray-300"
-            style={{ fontSize: "1.65em", color: name ? themeColor : undefined }}
+            className="font-bold leading-tight"
+            placeholderClassName="not-italic"
+            style={{ fontSize: "1.8em", color: name ? themeColor : "#A3A3B0" }}
           />
         </div>
-        <div style={{ marginTop: 2 }}>
+        <div style={{ marginTop: 4 }}>
           <EditableText
             value={title}
-            placeholder="Your Job Title (e.g. Senior Product Designer)"
+            placeholder="The role you are applying for?"
             onSave={(v) => onUpdateField?.("title", v)}
             tag="p"
             className="font-medium"
             placeholderClassName="not-italic"
-            style={{ fontSize: "1.15em", color: BODY_COLOR }}
+            style={{ fontSize: "1.1em", color: title ? themeColor : "#A3A3B0" }}
           />
         </div>
       </div>
@@ -289,21 +275,23 @@ export function BlockPreview({
       return (
         <div className="relative">
           <SectionHeading title="Experience" style={style} accentColor={accentColor} />
-          {[0, 1].map((i) => (
-            <div key={i} className="mb-3 last:mb-0">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="mb-4 last:mb-0">
               <div className="flex items-start justify-between">
                 <div className="flex flex-col gap-0.5">
-                  <p className="font-semibold italic" style={{ fontSize: "1em", color: "#C4C4CC" }}>Job Title, Company</p>
-                  <p className="italic" style={{ fontSize: "1em", color: "#C4C4CC" }}>City, Country</p>
+                  <p className="font-semibold" style={{ fontSize: "1em", color: "#A3A3B0" }}>Title</p>
+                  <p className="font-medium" style={{ fontSize: "1em", color: themeColor, opacity: 0.5 }}>Company Name</p>
                 </div>
-                <p className="font-medium italic text-right" style={{ fontSize: "1em", color: "#C4C4CC" }}>Start - End</p>
+                <div className="flex items-center gap-3 shrink-0" style={{ color: "#A3A3B0", fontSize: "0.9em" }}>
+                  <span className="flex items-center gap-1"><span style={{ fontSize: "0.85em" }}>&#128197;</span> Date period</span>
+                  <span className="flex items-center gap-1"><span style={{ fontSize: "0.85em" }}>&#128205;</span> Location</span>
+                </div>
               </div>
-              <ul className="mt-1 list-disc pl-5 italic" style={{ fontSize: "1em", color: "#C4C4CC" }}>
+              <ul className="mt-1.5 list-disc pl-5" style={{ fontSize: "0.95em", color: "#A3A3B0" }}>
                 <li>Highlight your accomplishments, using numbers if possible.</li>
               </ul>
             </div>
           ))}
-          <AddEntryButton onClick={handleAddEntry} label="Add experience" />
           <SectionDivider />
         </div>
       );
@@ -410,7 +398,6 @@ export function BlockPreview({
             )}
           </div>
         ))}
-        <AddEntryButton onClick={handleAddEntry} label="Add experience" />
         <SectionDivider />
       </div>
     );
@@ -432,18 +419,18 @@ export function BlockPreview({
       return (
         <div className="relative">
           <SectionHeading title="Education" style={style} accentColor={accentColor} />
-          {[0].map((i) => (
-            <div key={i} className="mb-3 last:mb-0">
-              <div className="flex items-start justify-between">
-                <div className="flex flex-col gap-0.5">
-                  <p className="font-semibold italic" style={{ fontSize: "1em", color: "#C4C4CC" }}>Degree and Field of Study</p>
-                  <p className="italic" style={{ fontSize: "1em", color: "#C4C4CC" }}>School or University</p>
-                </div>
-                <p className="font-medium italic text-right" style={{ fontSize: "1em", color: "#C4C4CC" }}>Start - End</p>
+          <div className="mb-3">
+            <div className="flex items-start justify-between">
+              <div className="flex flex-col gap-0.5">
+                <p className="font-semibold" style={{ fontSize: "1em", color: themeColor, opacity: 0.5 }}>Degree and Field of Study</p>
+                <p className="font-medium" style={{ fontSize: "1em", color: themeColor, opacity: 0.5 }}>School or University</p>
+              </div>
+              <div className="flex items-center gap-3 shrink-0" style={{ color: "#A3A3B0", fontSize: "0.9em" }}>
+                <span className="flex items-center gap-1"><span style={{ fontSize: "0.85em" }}>&#128197;</span> Date period</span>
+                <span className="flex items-center gap-1"><span style={{ fontSize: "0.85em" }}>&#128205;</span> Location</span>
               </div>
             </div>
-          ))}
-          <AddEntryButton onClick={handleAddEntry} label="Add education" />
+          </div>
           <SectionDivider />
         </div>
       );
@@ -512,7 +499,6 @@ export function BlockPreview({
             )}
           </div>
         ))}
-        <AddEntryButton onClick={handleAddEntry} label="Add education" />
         <SectionDivider />
       </div>
     );
@@ -531,10 +517,9 @@ export function BlockPreview({
       return (
         <div className="relative">
           <SectionHeading title={block.title} style={style} accentColor={accentColor} />
-          <p className="font-semibold italic" style={{ fontSize: "1em", color: "#C4C4CC" }}>
-            Your Skill, Another Skill, One More Skill
-          </p>
-          <AddEntryButton onClick={handleAddSkill} label={`Add ${block.title.toLowerCase().replace(/s$/, "")}`} />
+          <span className="inline-block rounded px-2 py-0.5 border border-dashed" style={{ fontSize: "0.9em", color: themeColor, opacity: 0.5, borderColor: themeColor }}>
+            Your Skill
+          </span>
           <SectionDivider />
         </div>
       );
@@ -626,7 +611,6 @@ export function BlockPreview({
       <div className="relative">
         <SectionHeading title={block.title} style={style} accentColor={accentColor} />
         {renderSkills()}
-        <AddEntryButton onClick={handleAddSkill} label={`Add ${block.title.toLowerCase().replace(/s$/, "")}`} />
         <SectionDivider />
       </div>
     );
@@ -646,7 +630,6 @@ export function BlockPreview({
         <div className="relative">
           <SectionHeading title="Projects" style={style} accentColor={accentColor} />
           <PlaceholderBlock label="Projects" hint="Add your projects" />
-          <AddEntryButton onClick={handleAddEntry} label="Add project" />
           <SectionDivider />
         </div>
       );
@@ -667,7 +650,6 @@ export function BlockPreview({
             <EditableText value={(item.description as string) || ""} placeholder="Project description..." onSave={(v) => onUpdateField?.(`items.${i}.description`, v)} tag="p" className="mt-0.5 leading-relaxed block" style={{ fontSize: "1em", color: BODY_COLOR }} multiline />
           </div>
         ))}
-        <AddEntryButton onClick={handleAddEntry} label="Add project" />
         <SectionDivider />
       </div>
     );
@@ -687,7 +669,6 @@ export function BlockPreview({
         <div className="relative">
           <SectionHeading title={block.title} style={style} accentColor={accentColor} />
           <PlaceholderBlock label={block.title} hint={`Add your ${block.title.toLowerCase()}`} />
-          <AddEntryButton onClick={handleAddEntry} label={`Add ${block.title.toLowerCase()}`} />
           <SectionDivider />
         </div>
       );
@@ -706,7 +687,6 @@ export function BlockPreview({
             <EditableText value={(item.description as string) || ""} placeholder="Description..." onSave={(v) => onUpdateField?.(`items.${i}.description`, v)} tag="p" className="mt-0.5 leading-relaxed block" style={{ fontSize: "1em", color: BODY_COLOR }} multiline />
           </div>
         ))}
-        <AddEntryButton onClick={handleAddEntry} label={`Add ${block.title.toLowerCase()}`} />
         <SectionDivider />
       </div>
     );

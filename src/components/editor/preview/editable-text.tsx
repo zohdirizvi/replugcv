@@ -176,7 +176,7 @@ export function EditableText({
         wordBreak: "break-word" as const,
         overflowWrap: "break-word" as const,
         ...(showPlaceholder && !editing
-          ? { color: "#9CA3AF", fontStyle: "italic" as const }
+          ? { color: "#B0B0BC", fontStyle: "italic" as const }
           : {}),
       }}
     >
