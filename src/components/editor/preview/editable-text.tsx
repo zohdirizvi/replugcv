@@ -34,7 +34,7 @@ function FormatToolbar({ targetRef }: { targetRef: React.RefObject<HTMLElement |
 
   return (
     <div
-      className="absolute -bottom-6 left-0 z-50 flex items-center gap-0.5 rounded border border-[#E5E5E5] bg-white px-0.5 py-0.5 shadow-md"
+      className="absolute -bottom-7 left-1/2 -translate-x-1/2 z-50 flex items-center gap-0.5 rounded-md border border-[#E5E5E5] bg-white px-1 py-0.5 shadow-lg"
       data-format-toolbar
       onMouseDown={(e) => e.preventDefault()}
     >

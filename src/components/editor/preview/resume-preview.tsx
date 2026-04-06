@@ -63,15 +63,26 @@ function BlockWrapper({
         if (step) onNavigateToStep(step);
         if (!target.isContentEditable) scrollToBlock(block.id);
       }}
-      className="relative cursor-pointer group/section"
+      className="relative cursor-pointer group/section transition-all"
       style={{
-        // Subtle selection: thin border, NO opacity dimming on others
-        // The page always looks like a real resume
-        ...(isSelected ? {
-          outline: "1.5px solid rgba(5, 150, 105, 0.4)",
-          outlineOffset: 2,
-          borderRadius: 3,
-        } : {}),
+        // Enhancv-style: subtle selection, hover feedback, no opacity dimming
+        outline: isSelected
+          ? "1.5px solid rgba(5, 150, 105, 0.5)"
+          : undefined,
+        outlineOffset: isSelected ? 3 : undefined,
+        borderRadius: 3,
+      }}
+      onMouseEnter={(e) => {
+        if (!isSelected) {
+          (e.currentTarget as HTMLElement).style.outline = "1px dashed rgba(5, 150, 105, 0.25)";
+          (e.currentTarget as HTMLElement).style.outlineOffset = "3px";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isSelected) {
+          (e.currentTarget as HTMLElement).style.outline = "";
+          (e.currentTarget as HTMLElement).style.outlineOffset = "";
+        }
       }}
     >
       <BlockPreview

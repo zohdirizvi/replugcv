@@ -90,7 +90,7 @@ function SectionHeading({
 /* ---- Section Divider — thin line, no extra margin (spacing handled by container) ---- */
 
 function SectionDivider() {
-  return <div style={{ borderBottom: "1px solid #E5E7EB", paddingTop: 8 }} />;
+  return <div style={{ borderBottom: "1px solid #E5E7EB" }} />;
 }
 
 /* ---- Placeholder ---- */

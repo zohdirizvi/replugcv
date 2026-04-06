@@ -8,19 +8,17 @@ import { SectionToolbar } from "./section-toolbar";
 
 const A4_W = 595;
 const A4_H = 842;
-const PAGE_GAP = 24;
+const PAGE_GAP = 28;
 
 /**
- * PaginatedPreview — proper page-break algorithm + floating toolbar.
+ * PaginatedPreview v3 — Enhancv-quality live editing experience.
  *
- * Architecture:
- * 1. Content renders ONCE inside a measured container
- * 2. After render, we measure each block's position via blockRefs
- * 3. If a block would cross a page boundary, we inject a CSS spacer
- *    (margin-top) on that block to push it entirely to the next page
- * 4. Page frames are drawn as white backgrounds at A4 intervals
- * 5. SectionToolbar renders OUTSIDE the page as a floating overlay
- * 6. Sticky pagination bar at bottom (only when 2+ pages)
+ * Principles:
+ * - The A4 page looks like a real printed document at ALL times
+ * - UI controls (toolbar, add button) float OUTSIDE the page as overlays
+ * - Page breaks: spacer injection via marginTop (not paddingTop)
+ * - No overlay hacks — spacers push content cleanly to next page
+ * - Hover feedback on sections (subtle dotted outline)
  */
 export function PaginatedPreview({ zoom }: { zoom: number }) {
   const {
@@ -34,91 +32,111 @@ export function PaginatedPreview({ zoom }: { zoom: number }) {
   const outerRef = useRef<HTMLDivElement>(null);
   const [pageCount, setPageCount] = useState(1);
   const [activePage, setActivePage] = useState(1);
-  const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null);
+  const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const m = designSettings.margins;
   const usable = A4_H - m.top - m.bottom;
 
-  /* ── Page-break spacer injection ── */
+  /* ── Page-break spacer injection ──
+     After render, measure each block's vertical position.
+     If a block would cross a page boundary, add marginTop
+     to push it to the next page's content zone.
+     Uses marginTop (not paddingTop) so content isn't shifted inside. */
   const injectSpacers = useCallback(() => {
     if (!contentRef.current) return;
 
-    // Get all block elements in order
+    const visibleBlocks = blocks.filter((b) => b.is_visible !== false);
     const blockEls: HTMLDivElement[] = [];
-    const orderedBlocks = blocks.filter((b) => b.is_visible !== false);
-    orderedBlocks.forEach((b) => {
+    visibleBlocks.forEach((b) => {
       const el = blockRefs.current[b.id];
       if (el) blockEls.push(el);
     });
 
-    // Reset all spacers first
-    blockEls.forEach((el) => { el.style.paddingTop = ""; });
+    // Reset all injected spacers
+    blockEls.forEach((el) => { el.style.marginTop = ""; });
 
-    // Measure and inject spacers
+    // Force reflow so measurements are accurate
+    void contentRef.current.offsetHeight;
+
     const containerTop = contentRef.current.getBoundingClientRect().top;
 
-    for (const el of blockEls) {
+    for (let idx = 0; idx < blockEls.length; idx++) {
+      const el = blockEls[idx];
       const rect = el.getBoundingClientRect();
       const blockTop = (rect.top - containerTop) / zoom;
       const blockBottom = blockTop + rect.height / zoom;
 
-      // Which page does this block start on?
+      // Which page does this block START on?
       const pageOfTop = Math.floor(blockTop / usable);
-      const pageEnd = (pageOfTop + 1) * usable;
+      const pageContentEnd = (pageOfTop + 1) * usable;
 
-      // If block crosses page boundary AND it's not the first item on the page
-      if (blockTop < pageEnd && blockBottom > pageEnd && blockTop > pageOfTop * usable + 1) {
-        // Push to next page: add spacing to skip remaining space + gap
-        const spacerHeight = pageEnd - blockTop + PAGE_GAP + m.top + m.bottom;
-        el.style.paddingTop = `${spacerHeight}px`;
+      // Does the block cross the page boundary?
+      if (blockBottom > pageContentEnd && blockTop < pageContentEnd) {
+        // How much space remains on current page?
+        const remaining = pageContentEnd - blockTop;
+
+        // If less than 25% of the block fits, push entire block to next page
+        const blockHeight = blockBottom - blockTop;
+        if (remaining < blockHeight * 0.75 || remaining < 40) {
+          // marginTop = remaining space on current page + bottom margin + gap + top margin
+          const spacer = remaining + m.bottom + PAGE_GAP + m.top;
+          el.style.marginTop = `${spacer}px`;
+        }
       }
     }
 
-    // Re-measure total height for page count
-    const totalHeight = contentRef.current.getBoundingClientRect().height / zoom;
-    const pages = Math.max(1, Math.ceil(totalHeight / usable));
-    setPageCount(pages);
+    // Measure final content height for page count
+    const totalH = contentRef.current.getBoundingClientRect().height / zoom;
+    setPageCount(Math.max(1, Math.ceil(totalH / usable)));
   }, [blocks, blockRefs, usable, zoom, m.top, m.bottom]);
 
+  // Run spacer injection after render, on resize, and on block changes
   useEffect(() => {
-    // Run spacer injection after render and on resize
-    const timer = setTimeout(injectSpacers, 50);
+    const timer = setTimeout(injectSpacers, 60);
     const el = contentRef.current;
     if (!el) return () => clearTimeout(timer);
-
-    const ro = new ResizeObserver(() => {
-      setTimeout(injectSpacers, 30);
-    });
+    const ro = new ResizeObserver(() => setTimeout(injectSpacers, 40));
     ro.observe(el);
     return () => { clearTimeout(timer); ro.disconnect(); };
   }, [injectSpacers]);
 
-  /* ── Toolbar positioning — float outside the page ── */
-  useEffect(() => {
-    if (!selectedBlockId || !outerRef.current) {
-      setToolbarPos(null);
-      return;
-    }
+  /* ── Toolbar positioning ──
+     Calculates toolbar position relative to outerRef.
+     Updates on scroll AND on block resize (content changes). */
+  const updateToolbarPos = useCallback(() => {
+    if (!selectedBlockId || !outerRef.current) { setToolbarPos(null); return; }
     const blockEl = blockRefs.current[selectedBlockId];
     if (!blockEl) { setToolbarPos(null); return; }
 
-    const updatePos = () => {
-      const outerRect = outerRef.current!.getBoundingClientRect();
-      const blockRect = blockEl.getBoundingClientRect();
-      setToolbarPos({
-        top: blockRect.top - outerRect.top - 32,
-        left: blockRect.left - outerRect.left + blockRect.width / 2,
-      });
-    };
+    const outerRect = outerRef.current.getBoundingClientRect();
+    const blockRect = blockEl.getBoundingClientRect();
+    setToolbarPos({
+      top: blockRect.top - outerRect.top - 36,
+      left: blockRect.left - outerRect.left + blockRect.width / 2,
+      width: blockRect.width,
+    });
+  }, [selectedBlockId, blockRefs]);
 
-    updatePos();
-    // Update on scroll
+  useEffect(() => {
+    updateToolbarPos();
     const container = scrollRef.current;
+    const blockEl = selectedBlockId ? blockRefs.current[selectedBlockId] : null;
+
     if (container) {
-      container.addEventListener("scroll", updatePos, { passive: true });
-      return () => container.removeEventListener("scroll", updatePos);
+      container.addEventListener("scroll", updateToolbarPos, { passive: true });
     }
-  }, [selectedBlockId, blockRefs, zoom]);
+    // Also observe selected block for size changes (user typing)
+    let blockRo: ResizeObserver | null = null;
+    if (blockEl) {
+      blockRo = new ResizeObserver(updateToolbarPos);
+      blockRo.observe(blockEl);
+    }
+
+    return () => {
+      container?.removeEventListener("scroll", updateToolbarPos);
+      blockRo?.disconnect();
+    };
+  }, [updateToolbarPos, selectedBlockId, blockRefs]);
 
   /* ── Scroll tracking ── */
   useEffect(() => {
@@ -132,7 +150,7 @@ export function PaginatedPreview({ zoom }: { zoom: number }) {
     return () => c.removeEventListener("scroll", onScroll);
   }, [pageCount, zoom]);
 
-  /* ── Auto-scroll to selected block's page ── */
+  /* ── Auto-scroll to selected block ── */
   useEffect(() => {
     if (!selectedBlockId || !contentRef.current || !scrollRef.current) return;
     const el = blockRefs.current[selectedBlockId];
@@ -151,22 +169,17 @@ export function PaginatedPreview({ zoom }: { zoom: number }) {
   };
 
   const totalH = pageCount * A4_H + (pageCount - 1) * PAGE_GAP;
-
-  // Find selected block for toolbar
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId);
   const selectedBlockIdx = selectedBlock ? blocks.indexOf(selectedBlock) : -1;
 
   return (
     <div ref={outerRef} className="flex-1 flex flex-col min-h-0 relative">
-      {/* Floating SectionToolbar — OUTSIDE the page, positioned via absolute */}
-      {selectedBlock && toolbarPos && toolbarPos.top > -50 && (
+
+      {/* ── Floating toolbar — OUTSIDE the page frame ── */}
+      {selectedBlock && toolbarPos && toolbarPos.top > 0 && (
         <div
-          className="absolute z-50 pointer-events-auto"
-          style={{
-            top: toolbarPos.top,
-            left: toolbarPos.left,
-            transform: "translateX(-50%)",
-          }}
+          className="absolute z-50"
+          style={{ top: toolbarPos.top, left: toolbarPos.left, transform: "translateX(-50%)" }}
         >
           <SectionToolbar
             blockType={selectedBlock.type}
@@ -180,13 +193,12 @@ export function PaginatedPreview({ zoom }: { zoom: number }) {
         </div>
       )}
 
-      {/* Scrollable pages */}
+      {/* ── Scrollable preview area ── */}
       <div
         ref={scrollRef}
-        className="flex-1 flex flex-col items-center p-6 overflow-y-auto scrollbar-thin"
+        className="flex-1 flex flex-col items-center py-8 px-6 overflow-y-auto scrollbar-thin"
         onClick={(e) => {
           const t = e.target as HTMLElement;
-          // Deselect when clicking background or page frame (not content)
           if (t === scrollRef.current || t.dataset.pageFrame !== undefined) {
             setSelectedBlockId(null);
           }
@@ -195,39 +207,30 @@ export function PaginatedPreview({ zoom }: { zoom: number }) {
         <div className="relative" style={{ width: A4_W * zoom, minHeight: totalH * zoom }}>
           <div style={{ width: A4_W, transform: `scale(${zoom})`, transformOrigin: "top left", height: totalH }}>
 
-            {/* Page frames — white rectangles with shadow */}
+            {/* Page frames — white A4 rectangles */}
             {Array.from({ length: pageCount }).map((_, i) => (
               <div
                 key={`pg-${i}`}
                 data-page-frame=""
-                className="absolute bg-white shadow-lg"
-                style={{ top: i * (A4_H + PAGE_GAP), left: 0, width: A4_W, height: A4_H, borderRadius: 4 }}
+                className="absolute bg-white"
+                style={{
+                  top: i * (A4_H + PAGE_GAP),
+                  left: 0,
+                  width: A4_W,
+                  height: A4_H,
+                  borderRadius: 3,
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04)",
+                }}
               >
                 {pageCount > 1 && (
-                  <span className="absolute select-none pointer-events-none" style={{ bottom: Math.max(8, m.bottom / 3), right: m.right, fontSize: 9, color: "#C4C4CC" }}>
+                  <span className="absolute select-none pointer-events-none" style={{ bottom: Math.max(8, m.bottom / 3), right: m.right, fontSize: 9, color: "#D4D4D4" }}>
                     {i + 1}
                   </span>
                 )}
               </div>
             ))}
 
-            {/* Margin zone overlays — hide content that bleeds into margins */}
-            {pageCount > 1 && Array.from({ length: pageCount - 1 }).map((_, i) => (
-              <div
-                key={`ov-${i}`}
-                className="absolute pointer-events-none"
-                style={{
-                  top: (i + 1) * A4_H - m.bottom + (i * PAGE_GAP),
-                  left: -2,
-                  width: A4_W + 4,
-                  height: m.bottom + PAGE_GAP + m.top,
-                  backgroundColor: "#F1F5F9",
-                  zIndex: 3,
-                }}
-              />
-            ))}
-
-            {/* Content — single render */}
+            {/* Content — single render, flows naturally with spacers */}
             <div
               ref={contentRef}
               style={{
@@ -239,7 +242,7 @@ export function PaginatedPreview({ zoom }: { zoom: number }) {
                 fontSize: designSettings.baseFontSize + "px",
                 lineHeight: designSettings.lineHeight,
                 color: "#717180",
-                zIndex: 2,
+                zIndex: 1,
               }}
             >
               <ResumePreview />
@@ -248,23 +251,22 @@ export function PaginatedPreview({ zoom }: { zoom: number }) {
         </div>
       </div>
 
-      {/* Sticky pagination — only when 2+ pages */}
+      {/* ── Sticky page navigation — only when 2+ pages ── */}
       {pageCount > 1 && (
-        <div className="shrink-0 flex items-center justify-center gap-2 py-2 border-t border-[#E2E8F0] bg-white">
+        <div className="shrink-0 flex items-center justify-center gap-2 py-2 border-t border-[#E5E7EB] bg-white">
           {Array.from({ length: pageCount }).map((_, i) => (
             <button
               key={i}
               onClick={() => scrollToPage(i + 1)}
-              className="px-3 py-1 rounded-full text-[11px] font-medium border-none cursor-pointer transition-colors"
+              className="size-7 rounded-full text-[11px] font-semibold border-none cursor-pointer transition-colors"
               style={{
-                backgroundColor: activePage === i + 1 ? "#059669" : "#E5E7EB",
+                backgroundColor: activePage === i + 1 ? "#059669" : "#F3F4F6",
                 color: activePage === i + 1 ? "#FFF" : "#737373",
               }}
             >
               {i + 1}
             </button>
           ))}
-          <span className="text-[10px] text-gray-400 ml-1">{pageCount} pages</span>
         </div>
       )}
     </div>
