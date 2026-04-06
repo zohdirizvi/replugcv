@@ -5,26 +5,19 @@ import { useEditorContext } from "../editor-context";
 import { TEMPLATES } from "../constants";
 import { ResumePreview } from "./resume-preview";
 
-const A4_WIDTH = 595;
-const A4_HEIGHT = 842;
+const A4_W = 595;
+const A4_H = 842;
+const PAGE_GAP = 32; // visual gap between pages
 
-type PaginatedPreviewProps = {
-  zoom: number;
-};
+type PaginatedPreviewProps = { zoom: number };
 
 /**
- * PaginatedPreview renders resume across visual A4 pages.
+ * PaginatedPreview — single-DOM render with visual page clipping.
  *
- * Architecture (single DOM render):
- * - ResumePreview renders ONCE in a single container
- * - Content grows naturally (no fixed height)
- * - We measure total content height via ResizeObserver
- * - Visual page frames are drawn as overlays at A4 intervals
- * - Page gaps are injected via CSS padding at break points
- *   so content naturally flows past margin zones
- *
- * This avoids duplicate DOM, duplicate contentEditable, and
- * duplicate React trees. The content IS the page.
+ * Content renders ONCE (no duplicate React trees / contentEditable).
+ * White overlay bars cover the margin zones between pages so content
+ * that crosses a page boundary is visually hidden (Google Docs approach).
+ * Each page shows its own margins, page number, and shadow.
  */
 export function PaginatedPreview({ zoom }: PaginatedPreviewProps) {
   const { designSettings, templateId, selectedBlockId, blockRefs, setSelectedBlockId } = useEditorContext();
@@ -35,17 +28,15 @@ export function PaginatedPreview({ zoom }: PaginatedPreviewProps) {
   const [pageCount, setPageCount] = useState(1);
   const [activePage, setActivePage] = useState(1);
 
-  const margins = designSettings.margins;
-  const usableHeight = A4_HEIGHT - margins.top - margins.bottom;
+  const m = designSettings.margins;
+  const usable = A4_H - m.top - m.bottom;
 
-  // Measure content and calculate page count
+  // Measure content → page count
   const measure = useCallback(() => {
     if (!contentRef.current) return;
-    const rect = contentRef.current.getBoundingClientRect();
-    const height = rect.height / zoom;
-    const pages = Math.max(1, Math.ceil(height / usableHeight));
-    setPageCount(pages);
-  }, [usableHeight, zoom]);
+    const h = contentRef.current.getBoundingClientRect().height / zoom;
+    setPageCount(Math.max(1, Math.ceil(h / usable)));
+  }, [usable, zoom]);
 
   useEffect(() => {
     measure();
@@ -56,138 +47,138 @@ export function PaginatedPreview({ zoom }: PaginatedPreviewProps) {
     return () => ro.disconnect();
   }, [measure]);
 
-  // Track active page during scroll
+  // Track active page on scroll
   useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
+    const c = scrollRef.current;
+    if (!c) return;
     const onScroll = () => {
-      const scrollTop = container.scrollTop;
-      const pageWithGap = (A4_HEIGHT + 32) * zoom;
-      const page = Math.min(pageCount, Math.max(1, Math.floor(scrollTop / pageWithGap) + 1));
-      setActivePage(page);
+      const pgH = (A4_H + PAGE_GAP) * zoom;
+      setActivePage(Math.min(pageCount, Math.max(1, Math.floor(c.scrollTop / pgH) + 1)));
     };
-    container.addEventListener("scroll", onScroll, { passive: true });
-    return () => container.removeEventListener("scroll", onScroll);
+    c.addEventListener("scroll", onScroll, { passive: true });
+    return () => c.removeEventListener("scroll", onScroll);
   }, [pageCount, zoom]);
 
-  // Scroll to page containing the selected block
+  // Auto-scroll to page containing selected block
   useEffect(() => {
     if (!selectedBlockId || !contentRef.current || !scrollRef.current) return;
-    const blockEl = blockRefs.current[selectedBlockId];
-    if (!blockEl) return;
+    const el = blockRefs.current[selectedBlockId];
+    if (!el) return;
+    const cRect = contentRef.current.getBoundingClientRect();
+    const bRect = el.getBoundingClientRect();
+    const blockTop = (bRect.top - cRect.top) / zoom;
+    const pg = Math.min(pageCount, Math.max(1, Math.floor(blockTop / usable) + 1));
+    setActivePage(pg);
+    scrollRef.current.scrollTo({ top: (pg - 1) * (A4_H + PAGE_GAP) * zoom, behavior: "smooth" });
+  }, [selectedBlockId, pageCount, usable, zoom, blockRefs]);
 
-    const containerRect = contentRef.current.getBoundingClientRect();
-    const blockRect = blockEl.getBoundingClientRect();
-    const blockTop = (blockRect.top - containerRect.top) / zoom;
-    const targetPage = Math.min(pageCount, Math.max(1, Math.floor(blockTop / usableHeight) + 1));
-
-    setActivePage(targetPage);
-    const pageWithGap = (A4_HEIGHT + 32) * zoom;
-    scrollRef.current.scrollTo({
-      top: (targetPage - 1) * pageWithGap,
-      behavior: "smooth",
-    });
-  }, [selectedBlockId, pageCount, usableHeight, zoom, blockRefs]);
-
-  const scrollToPage = (page: number) => {
-    setActivePage(page);
-    if (!scrollRef.current) return;
-    const pageWithGap = (A4_HEIGHT + 32) * zoom;
-    scrollRef.current.scrollTo({
-      top: (page - 1) * pageWithGap,
-      behavior: "smooth",
-    });
+  const scrollToPage = (pg: number) => {
+    setActivePage(pg);
+    scrollRef.current?.scrollTo({ top: (pg - 1) * (A4_H + PAGE_GAP) * zoom, behavior: "smooth" });
   };
 
-  // Total height of all pages including gaps
-  const totalHeight = pageCount * A4_HEIGHT + (pageCount - 1) * 32;
+  // Total scaled height (for the outer wrapper sizing)
+  const totalH = pageCount * A4_H + (pageCount - 1) * PAGE_GAP;
 
   return (
-    <div
-      ref={scrollRef}
-      className="flex-1 flex flex-col items-center p-6 overflow-y-auto scrollbar-thin"
-      onClick={(e) => {
-        // Only deselect if the click target is this container or the page wrapper (not content)
-        const target = e.target as HTMLElement;
-        if (target === scrollRef.current || target.dataset.pageWrapper !== undefined) {
-          setSelectedBlockId(null);
-        }
-      }}
-    >
-      <div className="relative" style={{ width: A4_WIDTH * zoom }}>
-        <div
-          style={{
-            width: A4_WIDTH,
-            transform: `scale(${zoom})`,
-            transformOrigin: "top left",
-            height: totalHeight,
-          }}
-        >
-          {/* Single white background for all pages */}
-          {Array.from({ length: pageCount }).map((_, i) => (
+    <div className="flex-1 flex flex-col min-h-0 relative">
+      {/* Scrollable pages area */}
+      <div
+        ref={scrollRef}
+        className="flex-1 flex flex-col items-center p-6 overflow-y-auto scrollbar-thin"
+        onClick={(e) => {
+          const t = e.target as HTMLElement;
+          if (t === scrollRef.current || t.dataset.pageOverlay !== undefined || t.dataset.pageFrame !== undefined) {
+            setSelectedBlockId(null);
+          }
+        }}
+      >
+        <div className="relative" style={{ width: A4_W * zoom, minHeight: totalH * zoom }}>
+          <div style={{ width: A4_W, transform: `scale(${zoom})`, transformOrigin: "top left", height: totalH }}>
+
+            {/* ── Page frames (white backgrounds + shadows) ── */}
+            {Array.from({ length: pageCount }).map((_, i) => (
+              <div
+                key={`frame-${i}`}
+                data-page-frame=""
+                className="absolute bg-white shadow-lg"
+                style={{ top: i * (A4_H + PAGE_GAP), left: 0, width: A4_W, height: A4_H, borderRadius: 4 }}
+              >
+                {/* Page number bottom-right */}
+                {pageCount > 1 && (
+                  <span className="absolute select-none pointer-events-none" style={{ bottom: Math.max(8, m.bottom / 3), right: m.right, fontSize: 9, color: "#C4C4CC" }}>
+                    {i + 1}
+                  </span>
+                )}
+              </div>
+            ))}
+
+            {/* ── Content: renders ONCE, flows naturally ── */}
             <div
-              key={i}
-              data-page-wrapper=""
-              className="absolute bg-white shadow-lg"
+              ref={contentRef}
               style={{
-                top: i * (A4_HEIGHT + 32),
-                left: 0,
-                width: A4_WIDTH,
-                height: A4_HEIGHT,
-                borderRadius: 4,
+                position: "absolute",
+                top: m.top,
+                left: m.left,
+                width: A4_W - m.left - m.right,
+                fontFamily: `'${designSettings.fontFamily}', ${template.bodyFont}`,
+                fontSize: designSettings.baseFontSize + "px",
+                lineHeight: designSettings.lineHeight,
+                color: "#717180",
+                zIndex: 1,
               }}
             >
-              {/* Page number */}
-              <span
-                className="absolute select-none pointer-events-none"
-                style={{ bottom: margins.bottom / 2 - 5, right: margins.right, fontSize: 9, color: "#C4C4CC" }}
-              >
-                {i + 1}
-              </span>
+              <ResumePreview />
             </div>
-          ))}
 
-          {/* Single content render — positioned on page 1, grows naturally */}
-          <div
-            ref={contentRef}
-            style={{
-              position: "absolute",
-              top: margins.top,
-              left: margins.left,
-              width: A4_WIDTH - margins.left - margins.right,
-              fontFamily: `'${designSettings.fontFamily}', ${template.bodyFont}`,
-              fontSize: designSettings.baseFontSize + "px",
-              lineHeight: designSettings.lineHeight,
-              color: "#717180",
-            }}
-          >
-            <ResumePreview />
+            {/* ── Margin overlays: white bars that hide content in margin zones ──
+                 Between page N bottom and page N+1 top, draw a white bar that
+                 covers: page N's bottom margin + gap + page N+1's top margin.
+                 This visually clips content at page boundaries. ── */}
+            {pageCount > 1 && Array.from({ length: pageCount - 1 }).map((_, i) => {
+              const overlayTop = (i + 1) * A4_H - m.bottom + (i * PAGE_GAP);
+              const overlayHeight = m.bottom + PAGE_GAP + m.top;
+              return (
+                <div
+                  key={`overlay-${i}`}
+                  data-page-overlay=""
+                  className="absolute"
+                  style={{
+                    top: overlayTop,
+                    left: -4,
+                    width: A4_W + 8,
+                    height: overlayHeight,
+                    backgroundColor: "#F1F5F9", // matches preview background
+                    zIndex: 2,
+                  }}
+                />
+              );
+            })}
+
+            {/* ── Top margin overlay for page 1 (hide content above top margin) ── */}
+            <div className="absolute" style={{ top: -4, left: -4, width: A4_W + 8, height: m.top + 4, backgroundColor: "#F1F5F9", zIndex: 0 }} />
+
           </div>
         </div>
       </div>
 
-      {/* Page navigation pills */}
+      {/* ── Sticky pagination bar — only when 2+ pages ── */}
       {pageCount > 1 && (
-        <div className="flex items-center gap-2 py-4 shrink-0">
+        <div className="shrink-0 flex items-center justify-center gap-2 py-2 border-t border-[#E2E8F0] bg-white/90 backdrop-blur-sm">
           {Array.from({ length: pageCount }).map((_, i) => (
             <button
               key={i}
-              onClick={(e) => { e.stopPropagation(); scrollToPage(i + 1); }}
-              className="px-3 py-1 rounded-full text-[10px] font-medium border-none cursor-pointer transition-colors"
+              onClick={() => scrollToPage(i + 1)}
+              className="px-3 py-1 rounded-full text-[11px] font-medium border-none cursor-pointer transition-colors"
               style={{
                 backgroundColor: activePage === i + 1 ? "#059669" : "#E5E7EB",
                 color: activePage === i + 1 ? "#FFFFFF" : "#737373",
               }}
             >
-              Page {i + 1}
+              {i + 1}
             </button>
           ))}
-        </div>
-      )}
-
-      {pageCount <= 1 && (
-        <div className="py-2 shrink-0">
-          <span className="text-[10px] text-gray-400">Page 1 of 1</span>
+          <span className="text-[10px] text-gray-400 ml-1">{pageCount} pages</span>
         </div>
       )}
     </div>
