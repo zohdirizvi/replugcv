@@ -4,43 +4,36 @@ import { useEditorContext } from "../editor-context";
 import { TEMPLATES } from "../constants";
 import type { ResumeBlock, TemplateStyles } from "../types";
 import { BlockPreview } from "./block-previews";
-import { SectionToolbar } from "./section-toolbar";
+import { AddEntryButton } from "./add-entry-button";
 
-/* ── Shared wrapper for each block (selection, hover, toolbar) ── */
+/* ── Block wrapper — clean, no UI chrome inside the page ── */
 
 function BlockWrapper({
   block,
-  blocks,
   style,
   accentColor,
   selectedBlockId,
   onSelect,
   onNavigateToStep,
   onAddEntry,
-  onDelete,
-  onReorder,
   onUpdateContent,
   onUpdateField,
   blockRefs,
   scrollToBlock,
 }: {
   block: ResumeBlock;
-  blocks: ResumeBlock[];
   style: TemplateStyles;
   accentColor: string;
   selectedBlockId: string | null;
   onSelect: (id: string | null) => void;
   onNavigateToStep: (step: number) => void;
   onAddEntry: (block: ResumeBlock) => void;
-  onDelete: (id: string) => void;
-  onReorder: (from: number, to: number) => void;
   onUpdateContent: (id: string, content: Record<string, unknown>) => void;
   onUpdateField: (id: string, fieldPath: string, value: unknown) => void;
   blockRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
   scrollToBlock: (id: string) => void;
 }) {
   const isSelected = selectedBlockId === block.id;
-  const blockIdx = blocks.indexOf(block);
 
   const stepMap: Record<string, number> = {
     header: 1, contact: 1,
@@ -58,51 +51,29 @@ function BlockWrapper({
   return (
     <div
       ref={(el) => { blockRefs.current[block.id] = el; }}
+      data-block-id={block.id}
+      data-block-type={block.type}
       onClick={(e) => {
         e.stopPropagation();
         const target = e.target as HTMLElement;
-
-        // If clicking on editable content inside an already-selected section,
-        // keep the selection — don't toggle off
         if (isSelected && target.isContentEditable) return;
-
-        // If clicking the non-editable part of an already-selected section, deselect
-        if (isSelected) {
-          onSelect(null);
-          return;
-        }
-
-        // Select this section and navigate to its wizard step
+        if (isSelected) { onSelect(null); return; }
         onSelect(block.id);
         const step = stepMap[block.type];
         if (step) onNavigateToStep(step);
         if (!target.isContentEditable) scrollToBlock(block.id);
       }}
-      className="relative cursor-pointer transition-all group/section"
+      className="relative cursor-pointer group/section"
       style={{
-        opacity: selectedBlockId && !isSelected ? 0.4 : 1,
-        // Selection indicator uses box-shadow + outline so it doesn't
-        // add any size or push content outside page margins
+        // Subtle selection: thin border, NO opacity dimming on others
+        // The page always looks like a real resume
         ...(isSelected ? {
-          outline: "1px solid #065f46",
-          boxShadow: "inset 3px 0 0 0 #065f46",
-          borderRadius: 4,
+          outline: "1.5px solid rgba(5, 150, 105, 0.4)",
+          outlineOffset: 2,
+          borderRadius: 3,
         } : {}),
       }}
     >
-      {isSelected && (
-        <SectionToolbar
-          blockType={block.type}
-          blockTitle={block.title}
-          onAddEntry={canAddEntry ? () => onAddEntry(block) : undefined}
-          onDelete={() => onDelete(block.id)}
-          onMoveUp={blockIdx > 0 ? () => onReorder(blockIdx, blockIdx - 1) : undefined}
-          onMoveDown={blockIdx < blocks.length - 1 ? () => onReorder(blockIdx, blockIdx + 1) : undefined}
-          canMoveUp={blockIdx > 0}
-          canMoveDown={blockIdx < blocks.length - 1}
-        />
-      )}
-
       <BlockPreview
         block={block}
         style={style}
@@ -110,6 +81,11 @@ function BlockWrapper({
         onUpdateContent={(content) => onUpdateContent(block.id, content)}
         onUpdateField={(fieldPath, value) => onUpdateField(block.id, fieldPath, value)}
       />
+
+      {/* Add entry: subtle + circle, only on hover/select */}
+      {isSelected && canAddEntry && (
+        <AddEntryButton onClick={() => onAddEntry(block)} label={`Add ${block.type}`} />
+      )}
     </div>
   );
 }
@@ -127,8 +103,6 @@ export function ResumePreview() {
     setCurrentStep,
     updateBlockContent,
     updateBlockField,
-    deleteBlock,
-    reorderBlocks,
     designSettings,
   } = useEditorContext();
 
@@ -140,7 +114,7 @@ export function ResumePreview() {
     const c = block.content as Record<string, unknown>;
     if (block.type === "experience") {
       const items = [...((c.items as Array<Record<string, unknown>>) || [])];
-      items.push({ role: "", company: "", startDate: "", endDate: "", description: "", bullets: [] });
+      items.push({ role: "", company: "", startDate: "", endDate: "", location: "", description: "", bullets: [], caseStudyUrl: "" });
       updateBlockContent(block.id, { ...c, items });
     } else if (block.type === "education") {
       const items = [...((c.items as Array<Record<string, unknown>>) || [])];
@@ -165,17 +139,13 @@ export function ResumePreview() {
     setCurrentStep(step as 1 | 2 | 3 | 4 | 5 | 6);
   };
 
-  /* Shared props for BlockWrapper */
   const wrapperProps = {
-    blocks,
     style,
     accentColor,
     selectedBlockId,
     onSelect: setSelectedBlockId,
     onNavigateToStep: handleNavigateToStep,
     onAddEntry: handleAddEntry,
-    onDelete: (id: string) => deleteBlock(id),
-    onReorder: reorderBlocks,
     onUpdateContent: updateBlockContent,
     onUpdateField: updateBlockField,
     blockRefs,
@@ -185,107 +155,45 @@ export function ResumePreview() {
   /* ─── TWO-COLUMN layout ─── */
   if (style.layout === "two-column") {
     const sidebarTypes = style.sidebarBlocks || [];
-
-    // Header always renders first (full or main based on headerSpan)
     const headerBlock = visibleBlocks.find((b) => b.type === "header");
     const nonHeaderBlocks = visibleBlocks.filter((b) => b.type !== "header");
-
-    // Split blocks into sidebar and main
     const sidebarBlocks = nonHeaderBlocks.filter((b) => sidebarTypes.includes(b.type));
     const mainBlocks = nonHeaderBlocks.filter((b) => !sidebarTypes.includes(b.type));
-
     const sidebarPct = style.sidebarWidth || 35;
     const mainPct = 100 - sidebarPct;
     const isLeftSidebar = style.sidebarPosition !== "right";
-    const sidebarBg = style.sidebarBgColor || "transparent";
-    const sidebarText = style.sidebarTextColor;
 
-    const renderSidebar = () => (
-      <div
-        style={{
-          width: `${sidebarPct}%`,
-          backgroundColor: sidebarBg,
-          padding: "0 12px",
-          color: sidebarText || undefined,
-          display: "flex",
-          flexDirection: "column",
-          gap: designSettings.sectionSpacing,
-        }}
-      >
-        {sidebarBlocks.map((block) => (
-          <BlockWrapper key={block.id} block={block} {...wrapperProps} />
-        ))}
+    const sidebar = (
+      <div style={{ width: `${sidebarPct}%`, backgroundColor: style.sidebarBgColor || "transparent", padding: "0 12px", color: style.sidebarTextColor || undefined }}>
+        {sidebarBlocks.map((b) => <BlockWrapper key={b.id} block={b} {...wrapperProps} />)}
       </div>
     );
-
-    const renderMain = () => (
-      <div
-        style={{
-          width: `${mainPct}%`,
-          padding: "0 12px",
-          display: "flex",
-          flexDirection: "column",
-          gap: designSettings.sectionSpacing,
-        }}
-      >
-        {/* If header lives in main area */}
-        {style.headerSpan === "main" && headerBlock && (
-          <BlockWrapper block={headerBlock} {...wrapperProps} />
-        )}
-        {mainBlocks.map((block) => (
-          <BlockWrapper key={block.id} block={block} {...wrapperProps} />
-        ))}
+    const main = (
+      <div style={{ width: `${mainPct}%`, padding: "0 12px" }}>
+        {style.headerSpan === "main" && headerBlock && <BlockWrapper block={headerBlock} {...wrapperProps} />}
+        {mainBlocks.map((b) => <BlockWrapper key={b.id} block={b} {...wrapperProps} />)}
       </div>
     );
 
     return (
       <div>
-        {/* Full-width header (if headerSpan is "full") */}
         {style.headerSpan !== "main" && headerBlock && (
-          <div
-            style={{
-              backgroundColor: style.headerBgColor || undefined,
-              color: style.headerTextColor || undefined,
-              padding: style.headerBgColor ? "16px 12px" : undefined,
-              marginBottom: designSettings.sectionSpacing,
-            }}
-          >
+          <div style={{ backgroundColor: style.headerBgColor || undefined, color: style.headerTextColor || undefined, padding: style.headerBgColor ? "16px 12px" : undefined, marginBottom: designSettings.sectionSpacing }}>
             <BlockWrapper block={headerBlock} {...wrapperProps} />
           </div>
         )}
-
-        {/* Two-column body */}
-        <div
-          style={{
-            display: "flex",
-            gap: 0,
-            minHeight: 400,
-          }}
-        >
-          {isLeftSidebar ? (
-            <>
-              {renderSidebar()}
-              {/* Subtle divider between columns */}
-              <div style={{ width: 1, backgroundColor: "#E5E7EB", flexShrink: 0 }} />
-              {renderMain()}
-            </>
-          ) : (
-            <>
-              {renderMain()}
-              <div style={{ width: 1, backgroundColor: "#E5E7EB", flexShrink: 0 }} />
-              {renderSidebar()}
-            </>
-          )}
+        <div style={{ display: "flex" }}>
+          {isLeftSidebar ? <>{sidebar}<div style={{ width: 1, backgroundColor: "#E5E7EB" }} />{main}</> : <>{main}<div style={{ width: 1, backgroundColor: "#E5E7EB" }} />{sidebar}</>}
         </div>
       </div>
     );
   }
 
-  /* ─── SINGLE COLUMN layout (default) ─── */
+  /* ─── SINGLE COLUMN ─── */
   if (visibleBlocks.length === 0) {
     return (
-      <div className="flex h-[762px] flex-col items-center justify-center text-gray-400">
-        <p className="text-sm">No blocks yet. Add a section to get started.</p>
+      <div className="flex h-[400px] flex-col items-center justify-center text-gray-400">
+        <p className="text-sm">Click a section to start editing</p>
       </div>
     );
   }

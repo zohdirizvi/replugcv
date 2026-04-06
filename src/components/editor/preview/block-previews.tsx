@@ -87,10 +87,10 @@ function SectionHeading({
   );
 }
 
-/* ---- Section Divider ---- */
+/* ---- Section Divider — thin line, no extra margin (spacing handled by container) ---- */
 
 function SectionDivider() {
-  return <div className="mt-3" style={{ borderBottom: "1px solid #E5E7EB" }} />;
+  return <div style={{ borderBottom: "1px solid #E5E7EB", paddingTop: 8 }} />;
 }
 
 /* ---- Placeholder ---- */
