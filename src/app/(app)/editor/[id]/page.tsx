@@ -106,7 +106,7 @@ function EditorInner() {
 
 
   return (
-    <div className="fixed inset-0 flex">
+    <div className="fixed inset-0 flex overflow-hidden">
       {/* Left: Dark sidebar 304px */}
       <LeftPanel />
 
@@ -126,16 +126,9 @@ function EditorInner() {
               <StepForm />
             </div>
 
-            {/* Bottom nav bar — translucent dock */}
+            {/* Bottom nav bar */}
             <div
-              className="px-6 py-3 flex items-center justify-between shrink-0 relative"
-              style={{
-                backgroundColor: "rgba(255, 255, 255, 0.85)",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-                borderTop: "1px solid rgba(5, 150, 105, 0.15)",
-                boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.04)",
-              }}
+              className="px-6 py-3 flex items-center justify-between shrink-0 bg-white border-t border-[#E5E5E5]"
             >
               {currentStep > 1 ? (
                 <button

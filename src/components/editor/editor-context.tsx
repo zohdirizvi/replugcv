@@ -102,7 +102,16 @@ export function EditorProvider({
   const [titleDraft, setTitleDraft] = useState("");
   const [zoom, setZoom] = useState(1.0);
   const [activeTab, setActiveTab] = useState<"builder" | "templates" | "settings">("builder");
-  const [templateId, setTemplateId] = useState<TemplateId>("modern-clean");
+  const [templateId, setTemplateIdRaw] = useState<TemplateId>("modern-clean");
+
+  // When template changes, sync its accent color to designSettings
+  const setTemplateId = useCallback((id: TemplateId) => {
+    setTemplateIdRaw(id);
+    const tmpl = TEMPLATES.find((t) => t.id === id);
+    if (tmpl) {
+      setDesignSettings((prev) => ({ ...prev, accentColor: tmpl.accentColor }));
+    }
+  }, []);
   const [userPlan, setUserPlan] = useState<string>("free");
   const [currentStep, setCurrentStep] = useState<StepId>(1);
   const [designSettings, setDesignSettings] = useState<ResumeDesignSettings>(DEFAULT_DESIGN_SETTINGS);

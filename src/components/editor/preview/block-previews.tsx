@@ -348,18 +348,18 @@ export function BlockPreview({
                   style={{ fontSize: "1em", color: BODY_COLOR }}
                 />
               </div>
-              <div className="shrink-0 text-right flex flex-col gap-0.5">
-                <div className="flex items-center gap-1 justify-end">
+              <div className="shrink-0 text-right flex flex-col gap-0.5" style={{ maxWidth: "40%" }}>
+                <div className="flex items-center gap-0.5 justify-end flex-wrap">
                   <EditableText
                     value={(item.startDate as string) || ""}
                     placeholder="Start"
                     onSave={(v) => onUpdateField?.(`items.${i}.startDate`, v)}
                     tag="span"
                     className="font-medium"
-                    style={{ fontSize: "1em", color: BODY_COLOR }}
+                    style={{ fontSize: "0.9em", color: BODY_COLOR }}
                   />
                   {((item.startDate as string) || (item.endDate as string)) && (
-                    <span style={{ color: BODY_COLOR, fontSize: "1em" }}>-</span>
+                    <span style={{ color: BODY_COLOR, fontSize: "0.9em" }}>-</span>
                   )}
                   <EditableText
                     value={(item.endDate as string) || ""}
@@ -367,7 +367,7 @@ export function BlockPreview({
                     onSave={(v) => onUpdateField?.(`items.${i}.endDate`, v)}
                     tag="span"
                     className="font-medium"
-                    style={{ fontSize: "1em", color: BODY_COLOR }}
+                    style={{ fontSize: "0.9em", color: BODY_COLOR }}
                   />
                 </div>
                 {(item.caseStudyUrl as string) && (
